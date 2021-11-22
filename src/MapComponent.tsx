@@ -244,7 +244,10 @@ function createInstance(type: string, { object, args, ...props }: any) {
   } else if (name.endsWith("Geometry")) {
     props = { attach: "geometry", ...props };
   } else if (name.endsWith("Style")) {
-    props = { attach: "style", ...props };
+    props = {
+      attach: name.substring(0, name.length - "Style".length),
+      ...props,
+    };
   } else if (name.endsWith("Source")) {
     props = { attach: "source", ...props };
   } else if (name.toLowerCase().endsWith("view")) {
