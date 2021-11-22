@@ -4,7 +4,7 @@
   "commit": true,
   "linked": [],
   "access": "public",
-  "baseBranch": "master",
+  "baseBranch": "main",
   "updateInternalDependencies": "minor",
   "ignore": []
 }
