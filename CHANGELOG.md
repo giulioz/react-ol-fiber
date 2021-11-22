@@ -1,8 +1,14 @@
 # react-ol-fiber
 
+## 0.0.4
+
+### Patch Changes
+
+- Add support for styles
+
 ## 0.0.3
 
-### Minor Changes
+### Patch Changes
 
 - Add support for geometries 
 - Now features doesn't need the attach prop anymore
