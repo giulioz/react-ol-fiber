@@ -1,5 +1,11 @@
 # react-ol-fiber
 
+## 0.0.5
+
+### Patch Changes
+
+- Fixed style attach prop behaviour
+
 ## 0.0.4
 
 ### Patch Changes
