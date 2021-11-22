@@ -4,6 +4,7 @@ import * as OLLayers from "ol/layer";
 import * as OLSources from "ol/source";
 import * as OLInteractions from "ol/interaction";
 import * as OLGeometries from "ol/geom";
+import * as OLStyles from "ol/style";
 
 export type StartingKeys<
   T,
@@ -122,6 +123,10 @@ type GeometryElements = AppendToKeys<
   ExtractIntrinsicElements<typeof OLGeometries>,
   "Geometry"
 >;
+type StyleElements = AppendToKeys<
+  ExtractIntrinsicElements<typeof OLStyles>,
+  "Style"
+>;
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -131,7 +136,8 @@ declare global {
         LayerElements,
         SourceElements,
         InteractionElements,
-        GeometryElements {
+        GeometryElements,
+        StyleElements {
       primitive: PrimitiveType<any, any>;
     }
   }
