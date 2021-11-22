@@ -1,7 +1,9 @@
+import React from "react";
 import * as OL from "ol";
 import * as OLLayers from "ol/layer";
 import * as OLSources from "ol/source";
 import * as OLInteractions from "ol/interaction";
+import * as OLGeometries from "ol/geom";
 
 export type StartingKeys<
   T,
@@ -116,6 +118,10 @@ type InteractionElements = AppendToKeys<
   ExtractIntrinsicElements<typeof OLInteractions>,
   "Interaction"
 >;
+type GeometryElements = AppendToKeys<
+  ExtractIntrinsicElements<typeof OLGeometries>,
+  "Geometry"
+>;
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -124,7 +130,8 @@ declare global {
       extends BaseElements,
         LayerElements,
         SourceElements,
-        InteractionElements {
+        InteractionElements,
+        GeometryElements {
       primitive: PrimitiveType<any, any>;
     }
   }

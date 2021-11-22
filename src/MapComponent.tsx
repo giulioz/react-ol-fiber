@@ -15,6 +15,7 @@ import * as OL from "ol";
 import * as OLLayers from "ol/layer";
 import * as OLSources from "ol/source";
 import * as OLInteractions from "ol/interaction";
+import * as OLGeometries from "ol/geom";
 import { ViewOptions } from "ol/View";
 import { fromLonLat } from "ol/proj";
 import { EventHandlerProps } from "./ol-types";
@@ -51,6 +52,7 @@ let catalogue: Catalogue = {
   "*Layer": OLLayers as any,
   "*Source": OLSources as any,
   "*Interaction": OLInteractions as any,
+  "*Geometry": OLGeometries as any,
 };
 
 export const extend = (objects: Catalogue): void =>
@@ -237,10 +239,14 @@ function createInstance(type: string, { object, args, ...props }: any) {
     props = { attachAdd: "layer", ...props };
   } else if (name.endsWith("Interaction")) {
     props = { attachAdd: "interaction", ...props };
+  } else if (name.endsWith("Geometry")) {
+    props = { attach: "geometry", ...props };
   } else if (name.endsWith("Source")) {
     props = { attach: "source", ...props };
   } else if (name.toLowerCase().endsWith("view")) {
     props = { attach: "view", ...props };
+  } else if (name.toLowerCase().endsWith("feature")) {
+    props = { attachAdd: "feature", ...props };
   } else if (name === "Primitive") {
     props = { _primitive: true, ...props };
   }
