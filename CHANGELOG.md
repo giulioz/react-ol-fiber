@@ -16,7 +16,7 @@
 
 ### Patch Changes
 
-- Add support for geometries 
+- Add support for geometries
 - Now features doesn't need the attach prop anymore
 
 ## 0.0.2
