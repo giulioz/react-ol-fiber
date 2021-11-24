@@ -7,3 +7,4 @@ dist-ssr
 coverage
 storybook-static
 tsconfig.json
+**/data/*
