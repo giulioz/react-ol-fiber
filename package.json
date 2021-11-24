@@ -30,6 +30,7 @@
     "postbuild": "tsc --emitDeclarationOnly",
     "prepublishOnly": "npm run build",
     "eslint": "eslint src --fix --ext=js,ts,tsx,jsx",
+    "typecheck": "tsc --emitDeclarationOnly",
     "test": "jest",
     "vers": "yarn changeset version",
     "release": "yarn build && yarn changeset publish",
