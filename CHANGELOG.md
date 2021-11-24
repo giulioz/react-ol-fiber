@@ -1,5 +1,11 @@
 # react-ol-fiber
 
+## 0.1.0
+
+### Minor Changes
+
+- f17dc72: Support for immutable objects re-creation
+
 ## 0.0.5
 
 ### Patch Changes
