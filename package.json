@@ -30,7 +30,7 @@
     "postbuild": "tsc --emitDeclarationOnly",
     "prepublishOnly": "npm run build",
     "eslint": "eslint src --fix --ext=js,ts,tsx,jsx",
-    "test": "echo no tests yet",
+    "test": "jest",
     "vers": "yarn changeset version",
     "release": "yarn build && yarn changeset publish",
     "changeset:add": "changeset add"
@@ -64,6 +64,7 @@
     "@types/scheduler": "^0.16.2",
     "@typescript-eslint/eslint-plugin": "^4.28.4",
     "@typescript-eslint/parser": "^4.28.4",
+    "babel-jest": "^27.3.1",
     "eslint": "^7.31.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-import-resolver-alias": "^1.1.2",
