@@ -31,7 +31,7 @@
     "prepublishOnly": "npm run build",
     "eslint": "eslint src --fix --ext=js,ts,tsx,jsx",
     "typecheck": "tsc --emitDeclarationOnly",
-    "test": "jest",
+    "test": "jest --coverage",
     "vers": "yarn changeset version",
     "release": "yarn build && yarn changeset publish",
     "changeset:add": "changeset add"
