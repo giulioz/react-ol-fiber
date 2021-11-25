@@ -2,6 +2,7 @@
 
 [![Version](https://img.shields.io/npm/v/react-ol-fiber)](https://npmjs.com/package/react-ol-fiber)
 [![Downloads](https://img.shields.io/npm/dt/react-ol-fiber.svg)](https://npmjs.com/package/react-ol-fiber)
+[![Test](https://github.com/giulioz/react-ol-fiber/actions/workflows/test.yml/badge.svg)](https://github.com/giulioz/react-ol-fiber/actions/workflows/test.yml)
 
 react-ol-fiber is a <a href="https://reactjs.org/docs/codebase-overview.html#renderers">React renderer</a> for <a href="https://openlayers.org/">OpenLayers</a>.
 
