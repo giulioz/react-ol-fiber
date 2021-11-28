@@ -12,8 +12,8 @@ import { pascalCase, pruneKeys, shallowCompare } from './utils';
 
 type GenericOLInstance = {
   dispose(): void;
-  get(key: string): unknown;
-  set(key: string, value: unknown): void;
+  get?: (key: string) => unknown;
+  set?: (key: string, value: unknown) => void;
   on(ev: string, handler: (...args: any) => void): void;
   un(ev: string, handler: (...args: any) => void): void;
   attach?: string;
@@ -62,29 +62,21 @@ function getConstructor(name: string) {
 }
 
 function getGetter<TK extends string>(instance: GenericOLInstance, prop: TK) {
-  return instance[`get${pascalCase(prop)}` as const]?.bind(instance) || (() => instance.get(prop));
+  return instance[`get${pascalCase(prop)}` as const]?.bind(instance) || (instance.get && (() => instance.get && instance.get(prop)));
 }
 function getSetter<TK extends string>(instance: GenericOLInstance, prop: TK) {
-  return instance[`set${pascalCase(prop)}` as const]?.bind(instance) || (instance.set && ((value: any) => instance.set(prop, value))) || null;
+  return instance[`set${pascalCase(prop)}` as const]?.bind(instance) || (instance.set && ((value: any) => instance.set && instance.set(prop, value))) || null;
 }
 function getAppender<TK extends string>(instance: GenericOLInstance, prop: TK) {
-  return (
-    instance[`add${pascalCase(prop)}` as const]?.bind(instance) ||
-    (() => {
-      throw new Error('No element appender found!');
-    })
-  );
+  return instance[`add${pascalCase(prop)}` as const]?.bind(instance) || null;
 }
 function getRemover<TK extends string>(instance: GenericOLInstance, prop: TK) {
-  return (
-    instance[`remove${pascalCase(prop)}` as const]?.bind(instance) ||
-    (() => {
-      throw new Error('No element remover found!');
-    })
-  );
+  return instance[`remove${pascalCase(prop)}` as const]?.bind(instance) || null;
 }
 function getHaser<TK extends string>(instance: GenericOLInstance, prop: TK) {
-  const array = getGetter(instance, `${prop}s`)();
+  const getter = getGetter(instance, `${prop}s`);
+  if (!getter) return () => false;
+  const array = getter();
   const arrayChecker = array?.includes?.bind(array) || array?.array_?.includes?.bind(array.array_);
   return instance[`has${pascalCase(prop)}` as const]?.bind(instance) || ((value: any) => arrayChecker(value)) || (() => false);
 }
@@ -127,10 +119,21 @@ function appendChild(parentInstance: GenericOLInstance, child: GenericOLInstance
     } else {
       // No setter, must recreate!
     }
-  } else if (child.attachAdd && !getHaser(parentInstance, child.attachAdd)(child)) {
-    getAppender(parentInstance, child.attachAdd)(child);
-    parentInstance._attachedAdd = parentInstance._attachedAdd || [];
-    parentInstance._attachedAdd.push({ key: child.attachAdd, value: child });
+  } else if (child.attachAdd) {
+    const appender = getAppender(parentInstance, child.attachAdd);
+    if (appender && !getHaser(parentInstance, child.attachAdd)(child)) {
+      appender(child);
+      parentInstance._attachedAdd = parentInstance._attachedAdd || [];
+      parentInstance._attachedAdd.push({ key: child.attachAdd, value: child });
+    } else {
+      const getter = getGetter(parentInstance, child.attachAdd);
+      const setter = getSetter(parentInstance, child.attachAdd);
+      if (getter && setter) {
+        const val = getter();
+        const arr = Array.isArray(val) ? val : [];
+        setter([...arr, child]);
+      }
+    }
   }
 
   child._parent = parentInstance || null;
@@ -153,12 +156,15 @@ function removeChild(parentInstance: GenericOLInstance, child: GenericOLInstance
       // No setter, must recreate!
     }
   } else if (child.attachAdd && getHaser(parentInstance, child.attachAdd)(child)) {
-    getRemover(parentInstance, child.attachAdd)(child);
-    parentInstance._attachedAdd = parentInstance._attachedAdd || [];
-    parentInstance._attachedAdd.splice(
-      parentInstance._attachedAdd.findIndex(e => e.key === child.attachAdd && e.value === child),
-      1,
-    );
+    const remover = getRemover(parentInstance, child.attachAdd);
+    if (remover) {
+      remover(child);
+      parentInstance._attachedAdd = parentInstance._attachedAdd || [];
+      parentInstance._attachedAdd.splice(
+        parentInstance._attachedAdd.findIndex(e => e.key === child.attachAdd && e.value === child),
+        1,
+      );
+    }
   }
 
   if (child.dispose) {
@@ -170,30 +176,38 @@ function insertBefore(parentInstance: GenericOLInstance, child: GenericOLInstanc
   if (!child) return;
 
   child._parent = parentInstance;
-  const children = (getGetter(parentInstance, `${child.attachAdd}s`)() as OL.Collection<unknown>)['array_'] as GenericOLInstance[];
-  const index = children.indexOf(beforeChild);
-  const newChildren = [...children.slice(0, index), child, ...children.slice(index)];
-  getSetter(parentInstance, `${child.attachAdd}s`)(newChildren);
+  const getter = getGetter(parentInstance, `${child.attachAdd}s`);
+  const setter = getSetter(parentInstance, `${child.attachAdd}s`);
+  if (getter && setter) {
+    const children = (getter() as OL.Collection<unknown>)['array_'] as GenericOLInstance[];
+    const index = children.indexOf(beforeChild);
+    const newChildren = [...children.slice(0, index), child, ...children.slice(index)];
+    setter(newChildren);
+  }
 }
 
-function autoAttach(name: string) {
-  if (name.endsWith('Layer')) {
+function autoAttach(name: string, props: any, object?: any) {
+  if (props.attach || props.attachAdd) return {};
+
+  if (name.endsWith('Layer') || object instanceof OLLayers.Layer) {
     return { attachAdd: 'layer' };
-  } else if (name.endsWith('Interaction')) {
+  } else if (name.endsWith('Interaction') || object instanceof OLInteractions.Interaction) {
     return { attachAdd: 'interaction' };
-  } else if (name.endsWith('Geometry')) {
+  } else if (name.endsWith('Geometry') || object instanceof OLGeometries.Geometry) {
     return { attach: 'geometry' };
   } else if (name === 'FillStyle' || name === 'StrokeStyle') {
     return { attach: name.substring(0, name.length - 'Style'.length).toLowerCase() };
-  } else if (name === 'StyleStyle') {
+  } else if (name === 'StyleStyle' || object instanceof OLStyles.Style) {
     return { attach: 'style' };
-  } else if (name.endsWith('Style')) {
+  } else if (name === 'TextStyle' || object instanceof OLStyles.Text) {
+    return { attach: 'text' };
+  } else if (name.endsWith('Style') || object instanceof OLStyles.Image) {
     return { attach: 'image' };
-  } else if (name.endsWith('Source')) {
+  } else if (name.endsWith('Source') || object instanceof OLSources.Source) {
     return { attach: 'source' };
-  } else if (name.toLowerCase().endsWith('view')) {
+  } else if (name.toLowerCase().endsWith('view') || object instanceof OL.View) {
     return { attach: 'view' };
-  } else if (name.toLowerCase().endsWith('feature')) {
+  } else if (name.toLowerCase().endsWith('feature') || object instanceof OL.Feature) {
     return { attachAdd: 'feature' };
   } else if (name === 'Primitive') {
     return { _primitive: true };
@@ -207,7 +221,7 @@ function getImmutableChildren(type: string, children: any): false | { type: stri
   if (target && children) {
     const childrenArr: { type: string; props: any }[] = Array.isArray(children) ? children : [children];
     const unappliableChildren = childrenArr.filter(c => {
-      const a = c && { ...autoAttach(pascalCase(c.type)), ...c.props };
+      const a = c && typeof c.type === 'string' && { ...autoAttach(pascalCase(c.type), c.props), ...c.props };
       const setter = a?.attach && target.prototype[`set${pascalCase(a.attach)}`];
       const adder = a?.attachAdd && target.prototype[`add${pascalCase(a.attachAdd)}`];
       return c && (!(setter || adder) || getImmutableChildren(c.type, c.props.children));
@@ -228,13 +242,13 @@ function createInstance(type: string, { object, args, ...props }: any) {
   if (type !== 'primitive' && !target) throw new Error(`${type} is not a part of the OL namespace.`);
   if (type === 'primitive' && !object) throw new Error(`"object" must be set when using primitives.`);
 
-  props = { ...props, ...autoAttach(name) };
+  props = { ...autoAttach(name, props, object), ...props };
 
   const unappliableChildren = getImmutableChildren(type, props.children);
   if (unappliableChildren) {
     const childrenArgs: any = {};
     unappliableChildren.forEach(c => {
-      const a = c && { ...autoAttach(pascalCase(c.type)), ...c.props };
+      const a = c && typeof c.type === 'string' && { ...autoAttach(pascalCase(c.type), c.props), ...c.props };
       if (a.attach && c) {
         childrenArgs[a.attach] = createInstance(c.type, c.props);
       }
