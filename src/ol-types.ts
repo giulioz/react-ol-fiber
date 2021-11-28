@@ -93,6 +93,7 @@ declare global {
   namespace JSX {
     interface IntrinsicElements extends BaseElements, LayerElements, SourceElements, InteractionElements, GeometryElements, StyleElements {
       primitive: PrimitiveType<any, any>;
+      olView: Node<ConstructedObject<typeof OL['View']>, typeof OL['View']>;
     }
   }
 }

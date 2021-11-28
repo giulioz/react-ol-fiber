@@ -44,6 +44,7 @@ let catalogue: Catalogue = {
   '*Interaction': OLInteractions as any,
   '*Geometry': OLGeometries as any,
   '*Style': OLStyles as any,
+  olView: OL.View as any,
 };
 
 export const extend = (objects: Catalogue): void => void (catalogue = { ...catalogue, ...objects });
@@ -52,13 +53,14 @@ function getConstructor(name: string) {
   const candidateEnding = Object.keys(catalogue)
     .find(k => k.startsWith('*') && name.endsWith(k.substring(1)))
     ?.substring(1);
-  const namespacedCatalogueEntry = candidateEnding && (catalogue as any)[`*${candidateEnding}`][name.substring(0, name.length - candidateEnding.length)];
+  const namespacedCatalogueEntry =
+    candidateEnding && (catalogue as any)[`*${candidateEnding}`][pascalCase(name.substring(0, name.length - candidateEnding.length))];
 
-  const directCatalogueEntry = catalogue[name] as {
+  const directCatalogueEntry = (catalogue[name] || catalogue[pascalCase(name)]) as {
     new (...args: any): GenericOLInstance;
   };
 
-  return directCatalogueEntry || namespacedCatalogueEntry || (OL as any)[name];
+  return directCatalogueEntry || namespacedCatalogueEntry || (OL as any)[pascalCase(name)];
 }
 
 function getGetter<TK extends string>(instance: GenericOLInstance, prop: TK) {
@@ -195,11 +197,11 @@ function autoAttach(name: string, props: any, object?: any) {
     return { attachAdd: 'interaction' };
   } else if (name.endsWith('Geometry') || object instanceof OLGeometries.Geometry) {
     return { attach: 'geometry' };
-  } else if (name === 'FillStyle' || name === 'StrokeStyle') {
+  } else if (name === 'fillStyle' || name === 'strokeStyle') {
     return { attach: name.substring(0, name.length - 'Style'.length).toLowerCase() };
-  } else if (name === 'StyleStyle' || object instanceof OLStyles.Style) {
+  } else if (name === 'styleStyle' || object instanceof OLStyles.Style) {
     return { attach: 'style' };
-  } else if (name === 'TextStyle' || object instanceof OLStyles.Text) {
+  } else if (name === 'textStyle' || object instanceof OLStyles.Text) {
     return { attach: 'text' };
   } else if (name.endsWith('Style') || object instanceof OLStyles.Image) {
     return { attach: 'image' };
@@ -209,19 +211,18 @@ function autoAttach(name: string, props: any, object?: any) {
     return { attach: 'view' };
   } else if (name.toLowerCase().endsWith('feature') || object instanceof OL.Feature) {
     return { attachAdd: 'feature' };
-  } else if (name === 'Primitive') {
+  } else if (name === 'primitive') {
     return { _primitive: true };
   }
   return {};
 }
 
 function getImmutableChildren(type: string, children: any): false | { type: string; props: any }[] {
-  const name = pascalCase(type);
-  const target = getConstructor(name);
+  const target = getConstructor(type);
   if (target && children) {
     const childrenArr: { type: string; props: any }[] = Array.isArray(children) ? children : [children];
     const unappliableChildren = childrenArr.filter(c => {
-      const a = c && typeof c.type === 'string' && { ...autoAttach(pascalCase(c.type), c.props), ...c.props };
+      const a = c && typeof c.type === 'string' && { ...autoAttach(c.type, c.props), ...c.props };
       const setter = a?.attach && target.prototype[`set${pascalCase(a.attach)}`];
       const adder = a?.attachAdd && target.prototype[`add${pascalCase(a.attachAdd)}`];
       return c && (!(setter || adder) || getImmutableChildren(c.type, c.props.children));
@@ -236,19 +237,18 @@ function getImmutableChildren(type: string, children: any): false | { type: stri
 }
 
 function createInstance(type: string, { object, args, ...props }: any) {
-  const name = pascalCase(type);
-  const target = getConstructor(name);
+  const target = getConstructor(type);
 
   if (type !== 'primitive' && !target) throw new Error(`${type} is not a part of the OL namespace.`);
   if (type === 'primitive' && !object) throw new Error(`"object" must be set when using primitives.`);
 
-  props = { ...autoAttach(name, props, object), ...props };
+  props = { ...autoAttach(type, props, object), ...props };
 
   const unappliableChildren = getImmutableChildren(type, props.children);
   if (unappliableChildren) {
     const childrenArgs: any = {};
     unappliableChildren.forEach(c => {
-      const a = c && typeof c.type === 'string' && { ...autoAttach(pascalCase(c.type), c.props), ...c.props };
+      const a = c && typeof c.type === 'string' && { ...autoAttach(c.type, c.props), ...c.props };
       if (a.attach && c) {
         childrenArgs[a.attach] = createInstance(c.type, c.props);
       }
