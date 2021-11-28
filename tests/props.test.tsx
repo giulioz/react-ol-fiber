@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 
 import { Fill, Style } from 'ol/style';
 import VectorLayer from 'ol/layer/Vector';
-import VectorSource from 'ol/source/Vector';
+import VectorSource, { VectorSourceEvent } from 'ol/source/Vector';
+import { Point } from 'ol/geom';
 
 describe('Args prop', () => {
   test('creates and recreates a style from args', async () => {
@@ -113,5 +114,73 @@ describe('Props', () => {
     expect(style.getFill().getColor()).toBe('red');
     await act(async () => externalEvent(false));
     expect(style.getFill().getColor()).toBe('blue');
+  });
+
+  test('apply props after recreation', async () => {
+    let externalEvent = (value: boolean) => {};
+    function MyStyle() {
+      const [state, setState] = useState(false);
+      externalEvent = setState;
+      return (
+        <styleStyle>
+          <strokeStyle args={{ color: state ? 'red' : 'blue' }} width={3} />
+        </styleStyle>
+      );
+    }
+    const [_, map, act] = await miniRender(
+      <vectorLayer>
+        <MyStyle />
+      </vectorLayer>,
+    );
+    const layer = map.getLayers().getArray()[0] as VectorLayer<VectorSource<any>>;
+    const style = layer.getStyle() as Style;
+    expect(style.getStroke().getColor()).toBe('blue');
+    expect(style.getStroke().getWidth()).toBe(3);
+    await act(async () => externalEvent(true));
+    expect(style.getStroke().getColor()).toBe('red');
+    expect(style.getStroke().getWidth()).toBe(3);
+    await act(async () => externalEvent(false));
+    expect(style.getStroke().getColor()).toBe('blue');
+    expect(style.getStroke().getWidth()).toBe(3);
+  });
+
+  test('apply and remove event props', async () => {
+    let extSetFeature = (value: boolean) => {};
+    let extSetHandler = (value: null | ((e: VectorSourceEvent<Point>) => void)) => {};
+    let nCalled = 0;
+    function Component() {
+      const [feature, setFeature] = useState(false);
+      extSetFeature = setFeature;
+      const [handler, setHandler] = useState<any>(() => {});
+      extSetHandler = setHandler;
+      return (
+        <vectorSource
+          // HACK: Fix events typings
+          onAddfeature={handler as any}
+        >
+          {feature && (
+            <feature>
+              <pointGeometry args={[0, 0]} />
+            </feature>
+          )}
+        </vectorSource>
+      );
+    }
+    const [, , act] = await miniRender(
+      <vectorLayer>
+        <Component />
+      </vectorLayer>,
+    );
+    await act(async () =>
+      extSetHandler(() => (e: VectorSourceEvent<Point>) => {
+        expect(e.feature?.getGeometry()).toBeInstanceOf(Point);
+        nCalled++;
+      }),
+    );
+    await act(async () => extSetFeature(true));
+    await act(async () => extSetHandler(null));
+    await act(async () => extSetFeature(false));
+    await act(async () => extSetFeature(true));
+    expect(nCalled).toBe(1);
   });
 });
