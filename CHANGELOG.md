@@ -1,5 +1,11 @@
 # react-ol-fiber
 
+## 0.3.1
+
+### Patch Changes
+
+- 6615d99: Removed useless files from NPM
+
 ## 0.3.0
 
 ### Minor Changes
