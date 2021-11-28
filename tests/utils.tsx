@@ -21,5 +21,5 @@ export async function miniRender(element: JSX.Element) {
     reconciler.updateContainer(element, root, null, () => undefined);
   });
 
-  return [rootDiv, map] as const;
+  return [rootDiv, map, reconciler.act] as const;
 }

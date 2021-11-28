@@ -289,4 +289,88 @@ describe('Dynamic attachments', () => {
       expect((layer.getSource().getFeatures()[2].getGeometry() as Point).getCoordinates()).toBe([2, 2]);
     }, 200);
   });
+
+  test('correctly attaches and removes a new layer in the middle after a while', async () => {
+    let externalEvent = (value: boolean) => {};
+    function Component() {
+      const [state, setState] = useState<boolean>(false);
+      externalEvent = setState;
+      return (
+        <>
+          <vectorLayer />
+          {state && <tileLayer />}
+          <imageLayer />
+        </>
+      );
+    }
+    const [_, map, act] = await miniRender(<Component />);
+    expect(map.getLayers().getLength()).toBe(2);
+    expect(map.getLayers().getArray()[0]).toBeInstanceOf(VectorLayer);
+    expect(map.getLayers().getArray()[1]).toBeInstanceOf(ImageLayer);
+    await act(async () => externalEvent(true));
+    expect(map.getLayers().getLength()).toBe(3);
+    expect(map.getLayers().getArray()[0]).toBeInstanceOf(VectorLayer);
+    expect(map.getLayers().getArray()[1]).toBeInstanceOf(TileLayer);
+    expect(map.getLayers().getArray()[2]).toBeInstanceOf(ImageLayer);
+    await act(async () => externalEvent(false));
+    expect(map.getLayers().getLength()).toBe(2);
+    expect(map.getLayers().getArray()[0]).toBeInstanceOf(VectorLayer);
+    expect(map.getLayers().getArray()[1]).toBeInstanceOf(ImageLayer);
+  });
+
+  test('correctly attaches and removes a new layer in the beginning after a while', async () => {
+    let externalEvent = (value: boolean) => {};
+    function Component() {
+      const [state, setState] = useState<boolean>(false);
+      externalEvent = setState;
+      return (
+        <>
+          {state && <tileLayer />}
+          <vectorLayer />
+          <imageLayer />
+        </>
+      );
+    }
+    const [_, map, act] = await miniRender(<Component />);
+    expect(map.getLayers().getLength()).toBe(2);
+    expect(map.getLayers().getArray()[0]).toBeInstanceOf(VectorLayer);
+    expect(map.getLayers().getArray()[1]).toBeInstanceOf(ImageLayer);
+    await act(async () => externalEvent(true));
+    expect(map.getLayers().getLength()).toBe(3);
+    expect(map.getLayers().getArray()[0]).toBeInstanceOf(TileLayer);
+    expect(map.getLayers().getArray()[1]).toBeInstanceOf(VectorLayer);
+    expect(map.getLayers().getArray()[2]).toBeInstanceOf(ImageLayer);
+    await act(async () => externalEvent(false));
+    expect(map.getLayers().getLength()).toBe(2);
+    expect(map.getLayers().getArray()[0]).toBeInstanceOf(VectorLayer);
+    expect(map.getLayers().getArray()[1]).toBeInstanceOf(ImageLayer);
+  });
+
+  test('correctly attaches and removes a new layer in the end after a while', async () => {
+    let externalEvent = (value: boolean) => {};
+    function Component() {
+      const [state, setState] = useState<boolean>(false);
+      externalEvent = setState;
+      return (
+        <>
+          <vectorLayer />
+          <imageLayer />
+          {state && <tileLayer />}
+        </>
+      );
+    }
+    const [_, map, act] = await miniRender(<Component />);
+    expect(map.getLayers().getLength()).toBe(2);
+    expect(map.getLayers().getArray()[0]).toBeInstanceOf(VectorLayer);
+    expect(map.getLayers().getArray()[1]).toBeInstanceOf(ImageLayer);
+    await act(async () => externalEvent(true));
+    expect(map.getLayers().getLength()).toBe(3);
+    expect(map.getLayers().getArray()[0]).toBeInstanceOf(VectorLayer);
+    expect(map.getLayers().getArray()[1]).toBeInstanceOf(ImageLayer);
+    expect(map.getLayers().getArray()[2]).toBeInstanceOf(TileLayer);
+    await act(async () => externalEvent(false));
+    expect(map.getLayers().getLength()).toBe(2);
+    expect(map.getLayers().getArray()[0]).toBeInstanceOf(VectorLayer);
+    expect(map.getLayers().getArray()[1]).toBeInstanceOf(ImageLayer);
+  });
 });
