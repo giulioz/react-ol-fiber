@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 
 import { Fill, Stroke, Style } from 'ol/style';
 import CircleStyle from 'ol/style/Circle';
+import TextStyle from 'ol/style/Text';
 import { Circle, Point, Polygon } from 'ol/geom';
 import { DragPan, MouseWheelZoom } from 'ol/interaction';
 import VectorLayer from 'ol/layer/Vector';
@@ -170,7 +171,7 @@ describe('Static attachments', () => {
     expect(styles[1].getFill().getColor()).toBe('blue');
   });
 
-  test('correctly attaches a full circle to a style (children as ctor params)', async () => {
+  test('correctly attaches a circle to a style (children as ctor params)', async () => {
     const [_, map] = await miniRender(
       <vectorLayer>
         <styleStyle>
@@ -189,6 +190,26 @@ describe('Static attachments', () => {
     const image = style.getImage() as CircleStyle;
     expect(image.getFill().getColor()).toBe('red');
     expect(image.getStroke().getColor()).toBe('blue');
+  });
+
+  test('correctly attaches text to a style', async () => {
+    const [_, map] = await miniRender(
+      <vectorLayer>
+        <styleStyle>
+          <textStyle args={{ text: 'abc' }}>
+            <fillStyle args={{ color: 'red' }} />
+          </textStyle>
+        </styleStyle>
+      </vectorLayer>,
+    );
+    const layer = map.getLayers().getArray()[0] as VectorLayer<VectorSource<any>>;
+    expect(layer.getStyle()).toBeInstanceOf(Style);
+    const style = layer.getStyle() as Style;
+    expect(style.getFill()).toBeFalsy();
+    expect(style.getText()).toBeInstanceOf(TextStyle);
+    const text = style.getText() as TextStyle;
+    expect(text.getFill().getColor()).toBe('red');
+    expect(text.getText()).toBe('abc');
   });
 
   test('correctly attaches primitives with auto attach', async () => {
