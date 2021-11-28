@@ -1,5 +1,16 @@
 # react-ol-fiber
 
+## 0.2.0
+
+### Minor Changes
+
+- d194b16: Allow attachAdd to use setters
+- cb62a44: Detect attach automatically in primitives
+
+### Patch Changes
+
+- 8a4634b: Fixed getImmutableChildren with components and attach prop priority
+
 ## 0.1.0
 
 ### Minor Changes
