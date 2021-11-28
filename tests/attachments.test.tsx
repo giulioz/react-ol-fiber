@@ -1,5 +1,5 @@
 import { miniRender } from './utils';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import { Fill, Stroke, Style } from 'ol/style';
 import CircleStyle from 'ol/style/Circle';
@@ -242,27 +242,48 @@ describe('Static attachments', () => {
     expect(style.getFill().getColor()).toBe('red');
     expect(style.getStroke().getColor()).toBe('blue');
   });
+
+  test('correctly attaches a view', async () => {
+    const [_, map] = await miniRender(<olView args={{ center: [42, 42] }} />);
+    map.on('change:view', () => expect(map.getView().getCenter()).toBe([42, 42]));
+  });
 });
 
 describe('Dynamic attachments', () => {
+  test('correctly attaches and removes a style from a layer', async () => {
+    let externalEvent = (value: number) => {};
+    function Component() {
+      const [state, setState] = useState<number>(0);
+      externalEvent = setState;
+      return <vectorLayer>{state > 0 && <styleStyle>{state > 1 && <fillStyle args={{ color: 'red' }} />}</styleStyle>}</vectorLayer>;
+    }
+    const [_, map, act] = await miniRender(<Component />);
+    const layer = map.getLayers().getArray()[0] as VectorLayer<VectorSource<any>>;
+    expect(layer.getStyle()).toBeInstanceOf(Function);
+    await act(async () => externalEvent(1));
+    expect(layer.getStyle()).toBeTruthy();
+    expect((layer.getStyle() as Style).getFill()).toBeFalsy();
+    await act(async () => externalEvent(2));
+    expect((layer.getStyle() as Style).getFill()).toBeInstanceOf(Fill);
+    expect((layer.getStyle() as Style).getFill().getColor()).toBe('red');
+    await act(async () => externalEvent(1));
+    expect((layer.getStyle() as Style).getFill()).toBeFalsy();
+    await act(async () => externalEvent(0));
+    expect(layer.getStyle()).toBeFalsy();
+  });
+
   test('correctly attaches features in order from state with timeout', async () => {
+    let externalEvent = () => {};
     function Component() {
       const [state, setState] = useState<null | [number, number][]>(null);
-      useEffect(
-        () =>
-          void setTimeout(
-            () =>
-              setState([
-                [0, 0],
-                [1, 1],
-                [2, 2],
-              ]),
-            100,
-          ),
-        [],
-      );
+      externalEvent = () =>
+        setState([
+          [0, 0],
+          [1, 1],
+          [2, 2],
+        ]);
       return (
-        <>
+        <vectorSource>
           {state
             ? state.map((c, i) => (
                 <feature key={i}>
@@ -270,24 +291,24 @@ describe('Dynamic attachments', () => {
                 </feature>
               ))
             : null}
-        </>
+        </vectorSource>
       );
     }
-    const [_, map] = await miniRender(
+    const [_, map, act] = await miniRender(
       <vectorLayer>
         <Component />
       </vectorLayer>,
     );
-    setTimeout(() => {
-      const layer = map.getLayers().getArray()[0] as VectorLayer<VectorSource<any>>;
-      expect(layer.getSource().getFeatures()).toHaveLength(3);
-      expect(layer.getSource().getFeatures()[0].getGeometry()).toBeInstanceOf(Point);
-      expect((layer.getSource().getFeatures()[0].getGeometry() as Point).getCoordinates()).toBe([0, 0]);
-      expect(layer.getSource().getFeatures()[1].getGeometry()).toBeInstanceOf(Point);
-      expect((layer.getSource().getFeatures()[1].getGeometry() as Point).getCoordinates()).toBe([1, 1]);
-      expect(layer.getSource().getFeatures()[2].getGeometry()).toBeInstanceOf(Point);
-      expect((layer.getSource().getFeatures()[2].getGeometry() as Point).getCoordinates()).toBe([2, 2]);
-    }, 200);
+    const layer = map.getLayers().getArray()[0] as VectorLayer<VectorSource<any>>;
+    expect(layer.getSource().getFeatures()).toHaveLength(0);
+    await act(async () => externalEvent());
+    expect(layer.getSource().getFeatures()).toHaveLength(3);
+    expect(layer.getSource().getFeatures()[0].getGeometry()).toBeInstanceOf(Point);
+    expect((layer.getSource().getFeatures()[0].getGeometry() as Point).getCoordinates()).toStrictEqual([0, 0]);
+    expect(layer.getSource().getFeatures()[1].getGeometry()).toBeInstanceOf(Point);
+    expect((layer.getSource().getFeatures()[1].getGeometry() as Point).getCoordinates()).toStrictEqual([1, 1]);
+    expect(layer.getSource().getFeatures()[2].getGeometry()).toBeInstanceOf(Point);
+    expect((layer.getSource().getFeatures()[2].getGeometry() as Point).getCoordinates()).toStrictEqual([2, 2]);
   });
 
   test('correctly attaches and removes a new layer in the middle after a while', async () => {
