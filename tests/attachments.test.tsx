@@ -11,6 +11,7 @@ import TileLayer from 'ol/layer/Tile';
 import ImageLayer from 'ol/layer/Image';
 import VectorSource from 'ol/source/Vector';
 import { Feature } from 'ol';
+import { Attribution, Zoom } from 'ol/control';
 
 describe('Static attachments', () => {
   test('correctly attaches a single layer to a map (implicit)', async () => {
@@ -132,6 +133,18 @@ describe('Static attachments', () => {
     expect(map.getInteractions().getArray()).toHaveLength(2);
     expect(map.getInteractions().getArray()[0]).toBeInstanceOf(DragPan);
     expect(map.getInteractions().getArray()[1]).toBeInstanceOf(MouseWheelZoom);
+  });
+
+  test('correctly attaches multiple controls', async () => {
+    const [_, map] = await miniRender(
+      <>
+        <zoomControl />
+        <attributionControl />
+      </>,
+    );
+    expect(map.getControls().getArray()).toHaveLength(2);
+    expect(map.getControls().getArray()[0]).toBeInstanceOf(Zoom);
+    expect(map.getControls().getArray()[1]).toBeInstanceOf(Attribution);
   });
 
   test('correctly attaches fill and stroke to a style', async () => {
