@@ -29,7 +29,7 @@
 
 ### Minor Changes
 
-- d9a333f: Fixed JSX intrisics clashing for <view />, now it's callable using <olView />
+- d9a333f: Fixed JSX intrisics clashing for `<view />`, now it's callable using `<olView />`
 
 ## 0.2.0
 
