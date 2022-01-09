@@ -154,10 +154,7 @@ describe('Props', () => {
       const [handler, setHandler] = useState<any>(() => {});
       extSetHandler = setHandler;
       return (
-        <vectorSource
-          // HACK: Fix events typings
-          onAddfeature={handler as any}
-        >
+        <vectorSource onAddfeature={handler}>
           {feature && (
             <feature>
               <pointGeometry args={[0, 0]} />

@@ -6,6 +6,11 @@ import * as OLInteractions from 'ol/interaction';
 import * as OLGeometries from 'ol/geom';
 import * as OLStyles from 'ol/style';
 import * as OLControls from 'ol/control';
+import RenderEvent from 'ol/render/Event';
+import { ObjectEvent } from 'ol/Object';
+import { VectorSourceEvent } from 'ol/source/Vector';
+import { TileSourceEvent } from 'ol/source/Tile';
+import { ImageSourceEvent } from 'ol/source/Image';
 
 export type StartingKeys<T, Str extends string, Rest extends string = string> = {
   [K in keyof T]: K extends `${Str}${Rest}` ? K : never;
@@ -65,9 +70,33 @@ type ListenerTypeForKey<T, K> = T extends {
   ? L
   : never;
 
+type KnownEventFix<K extends string, T> = K extends `Pointer${infer Rest}`
+  ? (e: OL.MapBrowserEvent<PointerEvent>) => void
+  : K extends `${infer Rest}click`
+  ? (e: OL.MapBrowserEvent<MouseEvent>) => void
+  : K extends `${infer Rest}compose`
+  ? (e: RenderEvent) => void
+  : K extends `${infer Rest}render`
+  ? (e: RenderEvent) => void
+  : K extends `${infer Rest}feature`
+  ? (e: VectorSourceEvent<any>) => void
+  : K extends `Featuresload${infer Rest}`
+  ? (e: VectorSourceEvent<any>) => void
+  : K extends `Tileload${infer Rest}`
+  ? (e: TileSourceEvent) => void
+  : K extends `Imageload${infer Rest}`
+  ? (e: ImageSourceEvent) => void
+  : K extends `Change:${infer Rest}`
+  ? (e: ObjectEvent) => void
+  : K extends `Propertychange`
+  ? (e: ObjectEvent) => void
+  : K extends `Move${infer Rest}`
+  ? (e: OL.MapEvent) => void
+  : ListenerTypeForKey<T, Uncapitalize<K>>;
+
 export type EventHandlerProps<T> = PrependToKeys<
   {
-    [key in Capitalize<EventHandlerKeys<T>>]: ListenerTypeForKey<T, Uncapitalize<key>>;
+    [key in Capitalize<EventHandlerKeys<T>>]: KnownEventFix<key, T>;
   },
   'on'
 >;
