@@ -5,6 +5,7 @@ import * as OLSources from 'ol/source';
 import * as OLInteractions from 'ol/interaction';
 import * as OLGeometries from 'ol/geom';
 import * as OLStyles from 'ol/style';
+import * as OLControls from 'ol/control';
 
 export type StartingKeys<T, Str extends string, Rest extends string = string> = {
   [K in keyof T]: K extends `${Str}${Rest}` ? K : never;
@@ -87,11 +88,12 @@ type SourceElements = AppendToKeys<ExtractIntrinsicElements<typeof OLSources>, '
 type InteractionElements = AppendToKeys<ExtractIntrinsicElements<typeof OLInteractions>, 'Interaction'>;
 type GeometryElements = AppendToKeys<ExtractIntrinsicElements<typeof OLGeometries>, 'Geometry'>;
 type StyleElements = AppendToKeys<ExtractIntrinsicElements<typeof OLStyles>, 'Style'>;
+type ControlElements = AppendToKeys<ExtractIntrinsicElements<typeof OLControls>, 'Control'>;
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
-    interface IntrinsicElements extends BaseElements, LayerElements, SourceElements, InteractionElements, GeometryElements, StyleElements {
+    interface IntrinsicElements extends BaseElements, LayerElements, SourceElements, InteractionElements, GeometryElements, StyleElements, ControlElements {
       primitive: PrimitiveType<any, any>;
       olView: Node<ConstructedObject<typeof OL['View']>, typeof OL['View']>;
     }

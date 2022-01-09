@@ -7,6 +7,7 @@ import * as OLSources from 'ol/source';
 import * as OLInteractions from 'ol/interaction';
 import * as OLGeometries from 'ol/geom';
 import * as OLStyles from 'ol/style';
+import * as OLControls from 'ol/control';
 
 import { pascalCase, pruneKeys, shallowCompare } from './utils';
 
@@ -44,6 +45,7 @@ let catalogue: Catalogue = {
   '*Interaction': OLInteractions as any,
   '*Geometry': OLGeometries as any,
   '*Style': OLStyles as any,
+  '*Control': OLControls as any,
   olView: OL.View as any,
 };
 
@@ -207,6 +209,8 @@ function autoAttach(name: string, props: any, object?: any) {
     return { attach: 'image' };
   } else if (name.endsWith('Source') || object instanceof OLSources.Source) {
     return { attach: 'source' };
+  } else if (name.endsWith('Control' || object instanceof OLControls.Control)) {
+    return { attachAdd: 'control' };
   } else if (name.toLowerCase().endsWith('view') || object instanceof OL.View) {
     return { attach: 'view' };
   } else if (name.toLowerCase().endsWith('feature') || object instanceof OL.Feature) {
