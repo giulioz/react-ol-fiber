@@ -1,5 +1,18 @@
 # react-ol-fiber
 
+## 0.4.0
+
+### Minor Changes
+
+- 90c5337: Added support for controls:
+
+  ```
+  <MapComponent>
+     <zoomControl />
+     <attributionControl />
+  </MapComponent>
+  ```
+
 ## 0.3.2
 
 ### Patch Changes
