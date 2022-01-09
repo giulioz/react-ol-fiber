@@ -1,5 +1,11 @@
 # react-ol-fiber
 
+## 0.3.2
+
+### Patch Changes
+
+- 30dc50d: Updated dependencies
+
 ## 0.3.1
 
 ### Patch Changes
