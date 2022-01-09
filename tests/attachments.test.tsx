@@ -1,5 +1,6 @@
 import { miniRender } from './utils';
-import React, { useState } from 'react';
+import { extend } from '../src';
+import React, { useRef, useState } from 'react';
 
 import { Fill, Stroke, Style } from 'ol/style';
 import CircleStyle from 'ol/style/Circle';
@@ -12,6 +13,17 @@ import ImageLayer from 'ol/layer/Image';
 import VectorSource from 'ol/source/Vector';
 import { Feature } from 'ol';
 import { Attribution, Zoom } from 'ol/control';
+import BaseObject from 'ol/Object';
+
+class UnknownCustom extends BaseObject {}
+extend({ UnknownCustom: UnknownCustom as any });
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      unknownCustom: any;
+    }
+  }
+}
 
 describe('Static attachments', () => {
   test('correctly attaches a single layer to a map (implicit)', async () => {
@@ -145,6 +157,17 @@ describe('Static attachments', () => {
     expect(map.getControls().getArray()).toHaveLength(2);
     expect(map.getControls().getArray()[0]).toBeInstanceOf(Zoom);
     expect(map.getControls().getArray()[1]).toBeInstanceOf(Attribution);
+  });
+
+  test('handles attachment of an invalid element with extend', async () => {
+    let refVal = null as any;
+    function TestComponent() {
+      return <unknownCustom ref={(e: any) => (refVal = e)} />;
+    }
+    const [_, map] = await miniRender(<TestComponent />);
+    expect(refVal).toBeInstanceOf(UnknownCustom);
+    expect(refVal.attach).toBeFalsy();
+    expect(refVal.attachAdd).toBeFalsy();
   });
 
   test('correctly attaches fill and stroke to a style', async () => {
