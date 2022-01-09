@@ -1,5 +1,11 @@
 # react-ol-fiber
 
+## 1.0.0
+
+### Major Changes
+
+- b56bf79: Manual typings for some event handlers. Now using any cast on the event parameter is not necessary anymore.
+
 ## 0.4.0
 
 ### Minor Changes
