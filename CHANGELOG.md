@@ -1,5 +1,11 @@
 # react-ol-fiber
 
+## 1.1.1
+
+### Patch Changes
+
+- 1037b49: Updated internal deps
+
 ## 1.1.0
 
 ### Minor Changes
