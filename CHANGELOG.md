@@ -1,5 +1,15 @@
 # react-ol-fiber
 
+## 1.1.0
+
+### Minor Changes
+
+- 8ba0424: Added a `<OLPrimitive />` wrapper for primitives to maintain the correct type using generics
+
+### Patch Changes
+
+- 64437d8: Fixed correct target type in event handlers, now it will have the correct type for all events
+
 ## 1.0.0
 
 ### Major Changes
