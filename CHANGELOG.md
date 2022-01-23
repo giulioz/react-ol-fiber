@@ -1,5 +1,11 @@
 # react-ol-fiber
 
+## 2.0.0
+
+### Major Changes
+
+- 60196f6: BREAKING: Splitted args for native elements into args and arg. While args now takes always an array, arg can take the first object parameter.
+
 ## 1.1.1
 
 ### Patch Changes
