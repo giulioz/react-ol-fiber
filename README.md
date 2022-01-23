@@ -18,31 +18,32 @@ Being a renderer and not a wrapper it's not tied to a specific version of OpenLa
 
 [![Edit react-ol-fiber-qs](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/react-ol-fiber-qs-32s5j?fontsize=14&hidenavigation=1&theme=dark&view=preview)
 
+<img src="https://i.imgur.com/k5AerZY.gif" />
+
 ```tsx
-import React, { useEffect, useState } from "react";
-import ReactDOM from "react-dom";
-import { MapComponent } from "react-ol-fiber";
-import "ol/ol.css";
+import React, { useEffect, useState } from 'react';
+import ReactDOM from 'react-dom';
+import { MapComponent } from 'react-ol-fiber';
+import 'ol/ol.css';
 
 function Shapes() {
   const [active, setActive] = useState(false);
-
   useEffect(() => {
-    const interval = setInterval(() => setActive((a) => !a), 500);
+    const interval = setInterval(() => setActive(a => !a), 500);
     return () => clearInterval(interval);
   }, []);
 
   return (
     <vectorLayer>
       <styleStyle>
-        <fillStyle args={{ color: active ? "blue" : "yellow" }} />
-        <strokeStyle args={{ color: "red" }} />
+        <fillStyle args={{ color: active ? 'blue' : 'yellow' }} />
+        <strokeStyle args={{ color: 'red' }} />
       </styleStyle>
 
       <vectorSource>
-        {new Array(100).fill(0).map((_, i) => (
+        {new Array(32 * 32).fill(0).map((_, i) => (
           <feature>
-            <circleGeometry args={[[i * 100000, 0], 30000]} />
+            <circleGeometry args={[[(i % 32) * 100000, Math.floor(i / 32) * 100000], 30000]} />
           </feature>
         ))}
       </vectorSource>
@@ -65,7 +66,46 @@ function App() {
   );
 }
 
-ReactDOM.render(<App />, document.getElementById("root"));
+ReactDOM.render(<App />, document.getElementById('root'));
+```
+
+## Docs
+
+### The MapComponent component
+
+The most important component in react-ol-fiber is `<MapComponent />` it instantiate an OpenLayer `Map` object and mounts it in a full-width and full-height div. As children you can provide OpenLayer elements that can be mounted inside the map, such as layers, controls and interactions.
+
+### Hooks
+
+Whenever you need to access the underlying OpenLayers map instance, you can use the `useOL()` hook. Remember that this can work only inside a component that is child of a MapComponent. :warning:
+
+```tsx
+function Inner() {
+  const { map } = useOL();
+  function centerOnFeatures(extent: number[]) {
+    const view = map.getView();
+    view.fit(extent);
+  }
+
+  return (
+    <vectorLayer>
+      <vectorSource onChange={e => centerOnFeatures(e.target.getExtent())}>
+        <feature>
+          <circleGeometry args={[[0, 0], 30000]} />
+        </feature>
+      </vectorSource>
+    </vectorLayer>
+  );
+}
+
+function Parent() {
+  // WARNING: you can't use useOL() here
+  return (
+    <MapComponent>
+      <Inner />
+    </MapComponent>
+  );
+}
 ```
 
 ## Credits
