@@ -100,7 +100,7 @@ describe('Static attachments', () => {
         <vectorSource>
           <feature>
             <styleStyle />
-            <pointGeometry args={[0, 0]} />
+            <pointGeometry arg={[0, 0]} />
           </feature>
         </vectorSource>
       </vectorLayer>,
@@ -117,13 +117,13 @@ describe('Static attachments', () => {
       <vectorLayer>
         <vectorSource>
           <feature>
-            <pointGeometry args={[0, 0]} />
+            <pointGeometry arg={[0, 0]} />
           </feature>
           <feature>
             <circleGeometry args={[[2, 5], 4]} />
           </feature>
           <feature>
-            <polygonGeometry args={[[]]} />
+            <polygonGeometry arg={[]} />
           </feature>
         </vectorSource>
       </vectorLayer>,
@@ -133,6 +133,9 @@ describe('Static attachments', () => {
     expect(layer.getSource().getFeatures()[0].getGeometry()).toBeInstanceOf(Point);
     expect(layer.getSource().getFeatures()[1].getGeometry()).toBeInstanceOf(Circle);
     expect(layer.getSource().getFeatures()[2].getGeometry()).toBeInstanceOf(Polygon);
+    const circle = layer.getSource().getFeatures()[1].getGeometry() as Circle;
+    expect(circle.getRadius()).toBe(4);
+    expect(circle.getCenter()).toEqual([2, 5]);
   });
 
   test('correctly attaches multiple interactions', async () => {
@@ -174,8 +177,8 @@ describe('Static attachments', () => {
     const [_, map] = await miniRender(
       <vectorLayer>
         <styleStyle>
-          <fillStyle args={{ color: 'red' }} />
-          <strokeStyle args={{ color: 'blue', width: 4 }} />
+          <fillStyle arg={{ color: 'red' }} />
+          <strokeStyle arg={{ color: 'blue', width: 4 }} />
         </styleStyle>
       </vectorLayer>,
     );
@@ -193,10 +196,10 @@ describe('Static attachments', () => {
       <vectorLayer>
         {/* TODO: support auto attachAdd with multiple children */}
         <styleStyle attachAdd='style'>
-          <fillStyle args={{ color: 'red' }} />
+          <fillStyle arg={{ color: 'red' }} />
         </styleStyle>
         <styleStyle attachAdd='style'>
-          <fillStyle args={{ color: 'blue' }} />
+          <fillStyle arg={{ color: 'blue' }} />
         </styleStyle>
       </vectorLayer>,
     );
@@ -212,8 +215,8 @@ describe('Static attachments', () => {
       <vectorLayer>
         <styleStyle>
           <circleStyle>
-            <fillStyle args={{ color: 'red' }} />
-            <strokeStyle args={{ color: 'blue', width: 4 }} />
+            <fillStyle arg={{ color: 'red' }} />
+            <strokeStyle arg={{ color: 'blue', width: 4 }} />
           </circleStyle>
         </styleStyle>
       </vectorLayer>,
@@ -232,8 +235,8 @@ describe('Static attachments', () => {
     const [_, map] = await miniRender(
       <vectorLayer>
         <styleStyle>
-          <textStyle args={{ text: 'abc' }}>
-            <fillStyle args={{ color: 'red' }} />
+          <textStyle arg={{ text: 'abc' }}>
+            <fillStyle arg={{ color: 'red' }} />
           </textStyle>
         </styleStyle>
       </vectorLayer>,
@@ -276,7 +279,7 @@ describe('Static attachments', () => {
       <vectorLayer>
         <primitive object={new VectorSource()}>
           <feature>
-            <pointGeometry args={[[]]} />
+            <pointGeometry arg={[]} />
           </feature>
           <feature>
             <primitive object={new Circle([2, 5], 4)} />
@@ -284,8 +287,8 @@ describe('Static attachments', () => {
           <primitive object={new Feature(new Polygon([]))} />
         </primitive>
         <primitive object={new Style()}>
-          <fillStyle args={{ color: 'red' }} />
-          <strokeStyle args={{ color: 'blue' }} />
+          <fillStyle arg={{ color: 'red' }} />
+          <strokeStyle arg={{ color: 'blue' }} />
         </primitive>
       </vectorLayer>,
     );
@@ -301,7 +304,7 @@ describe('Static attachments', () => {
   });
 
   test('correctly attaches a view', async () => {
-    const [_, map] = await miniRender(<olView args={{ center: [42, 42] }} />);
+    const [_, map] = await miniRender(<olView arg={{ center: [42, 42] }} />);
     map.on('change:view', () => expect(map.getView().getCenter()).toBe([42, 42]));
   });
 });
@@ -312,7 +315,7 @@ describe('Dynamic attachments', () => {
     function Component() {
       const [state, setState] = useState<number>(0);
       externalEvent = setState;
-      return <vectorLayer>{state > 0 && <styleStyle>{state > 1 && <fillStyle args={{ color: 'red' }} />}</styleStyle>}</vectorLayer>;
+      return <vectorLayer>{state > 0 && <styleStyle>{state > 1 && <fillStyle arg={{ color: 'red' }} />}</styleStyle>}</vectorLayer>;
     }
     const [_, map, act] = await miniRender(<Component />);
     const layer = map.getLayers().getArray()[0] as VectorLayer<VectorSource<any>>;

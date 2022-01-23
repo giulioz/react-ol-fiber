@@ -240,7 +240,7 @@ function getImmutableChildren(type: string, children: any): false | { type: stri
   return false;
 }
 
-function createInstance(type: string, { object, args, ...props }: any) {
+function createInstance(type: string, { object, arg, args, ...props }: any) {
   const target = getConstructor(type);
 
   if (type !== 'primitive' && !target) throw new Error(`${type} is not a part of the OL namespace.`);
@@ -258,11 +258,11 @@ function createInstance(type: string, { object, args, ...props }: any) {
       }
     });
 
-    args = args || {};
-    args = { ...args, ...childrenArgs };
+    arg = arg || {};
+    arg = { ...arg, ...childrenArgs };
   }
 
-  const instance = (object instanceof Function ? object() : object) || (Array.isArray(args) ? new target(...args) : new target(args));
+  const instance = (object instanceof Function ? object() : object) || (Array.isArray(args) ? new target(...args) : new target(arg));
 
   applyProps(instance, props, {}, []);
   return instance;
@@ -321,10 +321,10 @@ export const reconciler = Reconciler({
     if (instance._primitive && newProps.object && newProps.object !== instance) return [true];
     else {
       // This is a data object, let's extract critical information about it
-      const { args: argsNew = [], children: cN, ...restNew } = newProps;
-      const { args: argsOld = [], children: cO, ...restOld } = oldProps;
+      const { arg: argNew, args: argsNew = [], children: cN, ...restNew } = newProps;
+      const { arg: argOld, args: argsOld = [], children: cO, ...restOld } = oldProps;
       // If it has new props or arguments, then it needs to be re-instanciated
-      if (!shallowCompare(argsNew, argsOld)) return [true];
+      if (!shallowCompare(argsNew, argsOld) || !shallowCompare(argNew, argOld)) return [true];
       // Create a diff-set, flag if there are any changes
       const diff = Object.entries(restNew)
         .filter(([key, value]) => !shallowCompare(value, restOld[key]))

@@ -14,7 +14,7 @@ describe('Args prop', () => {
       externalEvent = setState;
       return (
         <styleStyle>
-          <fillStyle args={{ color: state ? 'red' : 'blue' }} />
+          <fillStyle args={[{ color: state ? 'red' : 'blue' }]} />
         </styleStyle>
       );
     }
@@ -39,8 +39,8 @@ describe('Args prop', () => {
       externalEvent = setState;
       return (
         <styleStyle>
-          <fillStyle args={{ color: 'red' }} />
-          <strokeStyle args={{ color: 'red', width: state }} />
+          <fillStyle arg={{ color: 'red' }} />
+          <strokeStyle args={[{ color: 'red', width: state }]} />
         </styleStyle>
       );
     }
@@ -70,7 +70,7 @@ describe('Args prop', () => {
       externalEvent = setState;
       return (
         <styleStyle ref={styleRef}>
-          <fillStyle ref={fillRef} args={{ color: state ? 'red' : 'blue' }} />
+          <fillStyle ref={fillRef} arg={{ color: state ? 'red' : 'blue' }} />
         </styleStyle>
       );
     }
@@ -98,7 +98,7 @@ describe('Props', () => {
       externalEvent = setState;
       return (
         <styleStyle>
-          <fillStyle args={{ color: 'green' }} color={state ? 'red' : 'blue'} />
+          <fillStyle arg={{ color: 'green' }} color={state ? 'red' : 'blue'} />
         </styleStyle>
       );
     }
@@ -123,7 +123,7 @@ describe('Props', () => {
       externalEvent = setState;
       return (
         <styleStyle>
-          <strokeStyle args={{ color: state ? 'red' : 'blue' }} width={3} />
+          <strokeStyle args={[{ color: state ? 'red' : 'blue' }]} width={3} />
         </styleStyle>
       );
     }
@@ -157,7 +157,7 @@ describe('Props', () => {
         <vectorSource onAddfeature={handler}>
           {feature && (
             <feature>
-              <pointGeometry args={[0, 0]} />
+              <pointGeometry arg={[0, 0]} />
             </feature>
           )}
         </vectorSource>

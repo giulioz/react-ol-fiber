@@ -42,11 +42,13 @@ export type SettableProps<T> = {
     : never;
 };
 
-export type Args<T> = T extends new (...args: unknown[]) => unknown ? ConstructorParameters<T> | ConstructorParameters<T>[0] : T;
+export type Arg<T> = T extends abstract new (...args: any) => any ? ConstructorParameters<T>[0] : T;
+export type Args<T> = T extends abstract new (...args: any) => any ? ConstructorParameters<T> : T;
 
 export interface NodeProps<T, P> {
   attach?: string;
   attachAdd?: string;
+  arg?: Omit<Arg<P>, 'prototype'>;
   args?: Omit<Args<P>, 'prototype'>;
   children?: React.ReactNode;
   ref?: React.Ref<T | undefined>;
@@ -102,6 +104,8 @@ export type EventHandlerProps<T> = PrependToKeys<
 >;
 
 export type Node<T, P> = Partial<SettableProps<T>> & Partial<EventHandlerProps<T>> & NodeProps<T, P>;
+
+export type TypeOLCustomClass<T> = Node<ConstructedObject<T>, T>;
 
 type ConstructedObject<T> = T extends new (...args: any) => infer C ? C : never;
 
