@@ -12,7 +12,8 @@ import * as OLControls from 'ol/control';
 import { pascalCase, pruneKeys, shallowCompare } from './utils';
 
 type GenericOLInstance = {
-  dispose(): void;
+  dispose?: () => void;
+  changed?: () => void;
   get?: (key: string) => unknown;
   set?: (key: string, value: unknown) => void;
   on(ev: string, handler: (...args: any) => void): void;
@@ -111,6 +112,14 @@ export function applyProps(instance: GenericOLInstance, newProps: Record<string,
   }
 }
 
+function triggerParentChanged(instance?: GenericOLInstance) {
+  if (instance && instance.changed) {
+    instance.changed();
+  } else if (instance && instance._parent) {
+    triggerParentChanged(instance._parent);
+  }
+}
+
 function appendChild(parentInstance: GenericOLInstance, child: GenericOLInstance) {
   if (!child) return;
 
@@ -142,6 +151,8 @@ function appendChild(parentInstance: GenericOLInstance, child: GenericOLInstance
 
   child._parent = parentInstance || null;
   child._root = parentInstance._root || parentInstance;
+
+  triggerParentChanged(parentInstance);
 }
 
 function removeChild(parentInstance: GenericOLInstance, child: GenericOLInstance) {
