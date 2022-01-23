@@ -75,6 +75,130 @@ ReactDOM.render(<App />, document.getElementById('root'));
 
 The most important component in react-ol-fiber is `<MapComponent />` it instantiate an OpenLayer `Map` object and mounts it in a full-width and full-height div. As children you can provide OpenLayer elements that can be mounted inside the map, such as layers, controls and interactions.
 
+```tsx
+function App() {
+  return (
+    <MapComponent
+      view={{
+        center: fromLonLat([37.41, 8.82]),
+        zoom: 4,
+      }}
+    >
+      <tileLayer>
+        <oSMSource />
+      </tileLayer>
+    </MapComponent>
+  );
+}
+```
+
+### Using OpenLayers classes
+
+To create instances of OpenLayers classes in react-ol-fiber you can use JSX primitives. As component name, use the original class name with the first letter in lower case, followed by its category.
+
+To provide arguments to the class constructor use the `args` prop, or `arg` if the constructor has a single parameter. To attach the children to the parent you can use the `attach` and `attachAdd` props (even though they are inferred automatically whenever possible by the reconciler).
+
+Some examples:
+
+```tsx
+function Component() {
+  return (
+    <>
+      <feature /> {/* ol/Feature */}
+      <tileLayer /> {/* ol/layers/Tile */}
+      <vectorLayer /> {/* ol/layers/Vector */}
+      <circleGeometry args={[[0, 0], 10]} /> {/* ol/geom/Circle */}
+      <pointGeometry arg={[0, 0]} /> {/* ol/geom/Point */}
+      <dragPanInteraction /> {/* ol/geom/Point */}
+      <styleStyle /> {/* ol/style/Style */}
+      <strokeStyle arg={{ color: 'red', width: 2 }} /> {/* ol/style/Stroke */}
+    </>
+  );
+}
+```
+
+### Props
+
+The props are applied using the setters found in the target object. The reconciler is optimized to call only the setters of the modified values.
+
+```tsx
+function Component() {
+  // This will call setOpacity in the VectorLayer
+  return <vectorLayer opacity={0.75} />;
+}
+```
+
+### Event handlers
+
+All the events described in the OpenLayers documentation are capitalized and prefixed with "on".
+
+```tsx
+function Component() {
+  // This will set the 'select' event
+  return <selectInteraction onSelect={e => console.log(e)} />;
+
+  // This will set the 'change' event
+  return <vectorSource onChange={e => console.log(e)} />;
+
+  // It also works on the map component!
+  return <MapComponent onPointermove={e => console.log(e.coordinate)} />;
+}
+```
+
+### Using primitives
+
+If you want to use your own already instanced objects, you can use the primitive wrapper and set a custom attach:
+
+```tsx
+function Component() {
+  const features = myLoadFeatures();
+  return (
+    <vectorSource>
+      {features.map((feature, i) => (
+        <primitive object={feature} key={i} attachAdd='feature' />
+      ))}
+    </vectorSource>
+  );
+}
+```
+
+:warning: Using the `<primitive />` instrinsic the props will not be checked. To have a generic primitive component, based on the `object` prop type, use the `<OLPrimitive />` wrapper instead.
+
+### Extending the catalogue
+
+To extend the available components reachable by react-ol-fiber, you can use the `extend()` command. You can even implement your own props application logic using setters!
+
+```tsx
+import BaseLayer from 'ol/layer/Base';
+class MyLayer extends BaseLayer {
+  constructor(args: { ctorArg: boolean }) {
+    super({});
+  }
+
+  setMyNumber(value: number) {
+    console.log(value);
+  }
+}
+
+import { extend, MapComponent, TypeOLCustomClass } from 'react-ol-fiber';
+extend({ MyLayer: MyLayer as any });
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      myLayer: TypeOLCustomClass<typeof MyLayer>;
+    }
+  }
+}
+
+function Test() {
+  return (
+    <MapComponent>
+      <myLayer arg={{ ctorArg: false }} myNumber={42} />
+    </MapComponent>
+  );
+}
+```
+
 ### Hooks
 
 Whenever you need to access the underlying OpenLayers map instance, you can use the `useOL()` hook. Remember that this can work only inside a component that is child of a MapComponent. :warning:
@@ -105,6 +229,22 @@ function Parent() {
       <Inner />
     </MapComponent>
   );
+}
+```
+
+## FAQ
+
+### I'm not seeing my map and the entire page is blank
+
+You need to add make your parent DOM elements full-height:
+
+```css
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
 }
 ```
 
