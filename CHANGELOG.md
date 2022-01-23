@@ -1,5 +1,11 @@
 # react-ol-fiber
 
+## 2.1.0
+
+### Minor Changes
+
+- f98e503: Automatically call changed if available
+
 ## 2.0.0
 
 ### Major Changes
