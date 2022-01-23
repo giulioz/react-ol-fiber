@@ -65,9 +65,9 @@ type EventHandlerKeys<T> = T extends {
   : never;
 
 type ListenerTypeForKey<T, K> = T extends {
-  on: (keys: K, listener: infer L) => any;
+  on: (keys: K, listener: (ev: infer L) => infer R) => any;
 }
-  ? L
+  ? (ev: Omit<L, 'target'> & { target: T }) => R
   : never;
 
 type KnownEventFix<K extends string, T> = K extends `Pointer${infer Rest}`
@@ -127,4 +127,9 @@ declare global {
       olView: Node<ConstructedObject<typeof OL['View']>, typeof OL['View']>;
     }
   }
+}
+
+// Allows correct props for a primitive with generics
+export function OLPrimitive<T>(props: { object: T } & NodeProps<T, unknown>) {
+  return <primitive {...props} />;
 }
