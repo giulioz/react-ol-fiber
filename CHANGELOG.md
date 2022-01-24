@@ -1,5 +1,11 @@
 # react-ol-fiber
 
+## 2.2.0
+
+### Minor Changes
+
+- 60bb479: Added react-spring support
+
 ## 2.1.0
 
 ### Minor Changes
