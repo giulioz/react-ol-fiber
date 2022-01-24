@@ -1599,6 +1599,42 @@
   resolved "https://registry.yarnpkg.com/@petamoriken/float16/-/float16-3.6.1.tgz#c49ae91e9fa26a1e3c15af7f95e2efa085100151"
   integrity sha512-SI0ovmGj/cUKYvxwbGl5TGDdFFCPLK3/zdOS0RCoYeYJMQZojsoiljIRwnBKxPFk/IsxI160Pk9n42O+XihQdw==
 
+"@react-spring/animated@~9.4.0":
+  version "9.4.2"
+  resolved "https://registry.yarnpkg.com/@react-spring/animated/-/animated-9.4.2.tgz#1dc107233ce4a44b023abac829f3b2ea8327a128"
+  integrity sha512-Dzum5Ho8e+LIAegAqRyoQFakD2IVH3ZQ2nsFXJorAFq3Xjv6IVPz/+TNxb/wSvnsMludfoF+ZIf319FSFmgD5w==
+  dependencies:
+    "@react-spring/shared" "~9.4.0"
+    "@react-spring/types" "~9.4.0"
+
+"@react-spring/core@^9.4.2":
+  version "9.4.2"
+  resolved "https://registry.yarnpkg.com/@react-spring/core/-/core-9.4.2.tgz#c20249535b3acaead015d17e1c4ce839ec3d4c9f"
+  integrity sha512-Ej/ULwdx8rQtMAWEpLgwbKcQEx6vPfjyG3cxLP05zAInpCoWkYpl+sXOp9tn3r99mTNQPTTt7BgQsSnmQA8+rQ==
+  dependencies:
+    "@react-spring/animated" "~9.4.0"
+    "@react-spring/rafz" "~9.4.0"
+    "@react-spring/shared" "~9.4.0"
+    "@react-spring/types" "~9.4.0"
+
+"@react-spring/rafz@~9.4.0":
+  version "9.4.2"
+  resolved "https://registry.yarnpkg.com/@react-spring/rafz/-/rafz-9.4.2.tgz#40a663d407cd116d436f662c6849f8e5b56234b6"
+  integrity sha512-rSm+G8E/XEEpnCGtT/xYN6o8VvEXlU8wN/hyKp4Q44XAZzGSMHLIFP7pY94/MmWsxCxjkw1AxUWhiFYxWrnI5Q==
+
+"@react-spring/shared@~9.4.0":
+  version "9.4.2"
+  resolved "https://registry.yarnpkg.com/@react-spring/shared/-/shared-9.4.2.tgz#45e103eee04f5e857ab2c575c2a84d3a883f0bfa"
+  integrity sha512-mZtbQLpMm6Vy5+O1MSlY9KuAcMO8rdUQvtdnC7Or7y7xiZlnzj8oAILyO6Y2rD2ZC1PmgVS0gMev/8T+MykW+Q==
+  dependencies:
+    "@react-spring/rafz" "~9.4.0"
+    "@react-spring/types" "~9.4.0"
+
+"@react-spring/types@~9.4.0":
+  version "9.4.2"
+  resolved "https://registry.yarnpkg.com/@react-spring/types/-/types-9.4.2.tgz#f0518f6d23a0b0f699a71976483323ac84bc4ace"
+  integrity sha512-GGiIscTM+CEUNV52anj3g5FqAZKL2+eRKtvBOAlC99qGBbvJ3qTLImrUR/I3lXY7PRuLgzI6kh34quA1oUxWYQ==
+
 "@rollup/plugin-babel@^5.2.0":
   version "5.3.0"
   resolved "https://registry.yarnpkg.com/@rollup/plugin-babel/-/plugin-babel-5.3.0.tgz#9cb1c5146ddd6a4968ad96f209c50c62f92f9879"

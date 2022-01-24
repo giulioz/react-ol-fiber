@@ -40,7 +40,7 @@ interface Catalogue {
         [k: string]: { new (...args: any): GenericOLInstance } | ((...args: any) => OL.Collection<GenericOLInstance>);
       };
 }
-let catalogue: Catalogue = {
+export let catalogue: Catalogue = {
   '*Layer': OLLayers as any,
   '*Source': OLSources as any,
   '*Interaction': OLInteractions as any,
@@ -86,9 +86,9 @@ function getHaser<TK extends string>(instance: GenericOLInstance, prop: TK) {
   return instance[`has${pascalCase(prop)}` as const]?.bind(instance) || ((value: any) => arrayChecker(value)) || (() => false);
 }
 
-export function applyProps(instance: GenericOLInstance, newProps: Record<string, unknown>, oldProps: Record<string, unknown>, diff?: string[]) {
+export function applyProps(instance: GenericOLInstance, newProps: Record<string, unknown>, oldProps?: Record<string, unknown>, diff?: string[]) {
   // Filter identical props and reserved keys
-  const identical = Object.keys(newProps).filter(key => newProps[key] === oldProps[key]);
+  const identical = Object.keys(newProps).filter(key => newProps[key] === oldProps?.[key]);
   const props = pruneKeys(newProps, [...identical, 'children', 'key', 'ref']);
 
   // Mutate our OL element
@@ -98,7 +98,7 @@ export function applyProps(instance: GenericOLInstance, newProps: Record<string,
         instance[key as 'attach'] = value;
       } else if (key.startsWith('on')) {
         const eventKey = key.substring(2).toLowerCase();
-        if (oldProps[key]) instance.un(eventKey, oldProps[key] as () => void);
+        if (oldProps?.[key]) instance.un(eventKey, oldProps[key] as () => void);
         instance.on(eventKey, value);
       } else {
         const setter = getSetter(instance, key);

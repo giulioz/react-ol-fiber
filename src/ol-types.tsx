@@ -123,13 +123,21 @@ type GeometryElements = AppendToKeys<ExtractIntrinsicElements<typeof OLGeometrie
 type StyleElements = AppendToKeys<ExtractIntrinsicElements<typeof OLStyles>, 'Style'>;
 type ControlElements = AppendToKeys<ExtractIntrinsicElements<typeof OLControls>, 'Control'>;
 
+export type AllElements = BaseElements &
+  LayerElements &
+  SourceElements &
+  InteractionElements &
+  GeometryElements &
+  StyleElements &
+  ControlElements & {
+    primitive: PrimitiveType<any, any>;
+    olView: Node<ConstructedObject<typeof OL['View']>, typeof OL['View']>;
+  };
+
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
-    interface IntrinsicElements extends BaseElements, LayerElements, SourceElements, InteractionElements, GeometryElements, StyleElements, ControlElements {
-      primitive: PrimitiveType<any, any>;
-      olView: Node<ConstructedObject<typeof OL['View']>, typeof OL['View']>;
-    }
+    interface IntrinsicElements extends AllElements {}
   }
 }
 
