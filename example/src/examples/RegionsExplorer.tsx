@@ -6,6 +6,7 @@ import VectorSource from 'ol/source/Vector';
 import GeoJSON from 'ol/format/GeoJSON';
 import { MapComponent, useOL } from '../../../src';
 
+import { SeeCodeButton } from '../components/SeeCodeButton';
 import { DarkCanvasLayer } from '../ol-components/DarkCanvasLayer';
 import italyRegions from '../../data/italy-regions.json';
 import '../style.css';
@@ -75,7 +76,7 @@ function RegionsOutlinesLayer({
 }
 
 const theme = createTheme({
-  palette: { mode: 'dark', primary: { main: '#ab760c' } },
+  palette: { mode: 'dark', primary: { main: '#ab760c' }, secondary: { main: '#fff' } },
 });
 
 export function RegionsExplorer() {
@@ -104,6 +105,8 @@ export function RegionsExplorer() {
           {hovered}
         </Typography>
       </Box>
+
+      <SeeCodeButton url='https://github.com/giulioz/react-ol-fiber/blob/main/example/src/examples/RegionsExplorer.tsx' />
     </ThemeProvider>
   );
 }

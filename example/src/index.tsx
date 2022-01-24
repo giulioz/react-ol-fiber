@@ -1,14 +1,28 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter, Link, Route, Switch } from 'react-router-dom';
 import { createTheme, CssBaseline, ThemeProvider, Button, Stack, Typography, Box } from '@mui/material';
 
+import { MapComponent, useOL } from '../../src';
 import { RegionsExplorer } from './examples/RegionsExplorer';
-import { MapComponent } from '../../src';
 import { DarkCanvasLayer } from './ol-components/DarkCanvasLayer';
+import { SeeCodeButton } from './components/SeeCodeButton';
+
+function MapRotator() {
+  const { map } = useOL();
+  useEffect(() => {
+    function loop() {
+      map.getView().adjustCenter([5000, 0]);
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+  }, []);
+
+  return null;
+}
 
 const theme = createTheme({
-  palette: { mode: 'dark' },
+  palette: { mode: 'dark', secondary: { main: '#fff' } },
 });
 
 function Intro() {
@@ -17,8 +31,9 @@ function Intro() {
       <CssBaseline />
 
       <Box sx={{ top: 0, left: 0, right: 0, bottom: 0, position: 'absolute', opacity: 0.3, zIndex: 1 }}>
-        <MapComponent>
+        <MapComponent view={{ center: [0, 3500000] }}>
           <DarkCanvasLayer />
+          <MapRotator />
         </MapComponent>
       </Box>
 
@@ -41,6 +56,8 @@ function Intro() {
           </Button>
         </Stack>
       </Stack>
+
+      <SeeCodeButton home url='https://github.com/giulioz/react-ol-fiber/blob/main/example/src/index.tsx' />
     </ThemeProvider>
   );
 }
