@@ -93,14 +93,14 @@ export function RegionsExplorer() {
       </MapComponent>
 
       {clicked && (
-        <Stack sx={{ position: 'absolute', top: 0, left: 0, right: 0, pt: 6 }} alignItems='center'>
-          <Button variant='contained' size='large' sx={{ fontSize: '24px' }} onClick={() => setClicked(null)}>
+        <Stack sx={{ position: 'absolute', top: 0, left: 0, right: 0, pt: 6, pointerEvents: 'none' }} alignItems='center'>
+          <Button variant='contained' size='large' sx={{ fontSize: '24px', pointerEvents: 'all' }} onClick={() => setClicked(null)}>
             Back to global view
           </Button>
         </Stack>
       )}
 
-      <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
+      <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, pointerEvents: 'none' }}>
         <Typography textTransform='uppercase' fontSize='48px' letterSpacing={4} sx={{ mb: 8 }} textAlign='center' fontWeight='medium'>
           {hovered}
         </Typography>
