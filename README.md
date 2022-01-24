@@ -36,8 +36,8 @@ function Shapes() {
   return (
     <vectorLayer>
       <styleStyle>
-        <fillStyle args={{ color: active ? 'blue' : 'yellow' }} />
-        <strokeStyle args={{ color: 'red' }} />
+        <fillStyle arg={{ color: active ? 'blue' : 'yellow' }} />
+        <strokeStyle arg={{ color: 'red' }} />
       </styleStyle>
 
       <vectorSource>
