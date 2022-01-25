@@ -12,6 +12,8 @@
     "@emotion/styled": "^11.6.0",
     "@mui/icons-material": "^5.2.5",
     "@mui/material": "^5.2.7",
+    "@react-spring/core": "^9.4.2",
+    "@react-spring/web": "^9.4.2",
     "ol": "^6.9.0",
     "react-router-dom": "^5.3.0",
     "use-asset": "^1.0.4"
