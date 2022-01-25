@@ -1,19 +1,16 @@
 import React from 'react';
-import { useHistory } from 'react-router-dom';
 import { Box, Button } from '@mui/material';
 import LinkIcon from '@mui/icons-material/Code';
 import DudeIcon from '@mui/icons-material/Laptop';
 import BackIcon from '@mui/icons-material/ArrowBack';
 
 export function SeeCodeButton({ url, home }: { url: string; home?: boolean }) {
-  const router = useHistory();
-
   return (
     <>
       {!home && (
         <Box sx={{ position: 'absolute', top: 0, left: 0, m: 4, zIndex: 999 }}>
-          <Button color='secondary' size='large' startIcon={<BackIcon />} onClick={() => router.goBack()}>
-            Back
+          <Button color='secondary' size='large' startIcon={<BackIcon />} href='/'>
+            Home
           </Button>
         </Box>
       )}
