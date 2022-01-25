@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 
 import { RegionsExplorer } from './examples/RegionsExplorer';
+import { Spring } from './examples/Spring';
 import { Intro } from './examples/Intro';
 
 function App() {
@@ -12,6 +13,9 @@ function App() {
         <Switch>
           <Route path='/regions-explorer'>
             <RegionsExplorer />
+          </Route>
+          <Route path='/spring'>
+            <Spring />
           </Route>
           <Route>
             <Intro />

@@ -18,7 +18,7 @@ function MapRotator() {
       requestAnimationFrame(loop);
     }
     requestAnimationFrame(loop);
-  }, []);
+  }, [map]);
 
   return null;
 }
@@ -48,6 +48,9 @@ export function Intro() {
           <Typography component='h2' textTransform='uppercase' fontSize='24px' letterSpacing={4} sx={{ mt: 6 }} textAlign='center'>
             Examples
           </Typography>
+          <Button sx={{ fontSize: '22px', pointerEvents: 'auto' }} component={Link} to='/spring'>
+            Spring Animations
+          </Button>
           <Button sx={{ fontSize: '22px', pointerEvents: 'auto' }} component={Link} to='/regions-explorer'>
             Regions Explorer
           </Button>

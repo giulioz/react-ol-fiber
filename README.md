@@ -145,6 +145,43 @@ function Component() {
 }
 ```
 
+### Hooks
+
+Whenever you need to access the underlying OpenLayers map instance, you can use the `useOL()` hook. Remember that this can work only inside a component that is child of a MapComponent. :warning:
+
+```tsx
+function Inner() {
+  const { map } = useOL();
+  function centerOnFeatures(extent: number[]) {
+    const view = map.getView();
+    view.fit(extent);
+  }
+
+  return (
+    <vectorLayer>
+      <vectorSource onChange={e => centerOnFeatures(e.target.getExtent())}>
+        <feature>
+          <circleGeometry args={[[0, 0], 30000]} />
+        </feature>
+      </vectorSource>
+    </vectorLayer>
+  );
+}
+
+function Parent() {
+  // WARNING: you can't use useOL() here
+  return (
+    <MapComponent>
+      <Inner />
+    </MapComponent>
+  );
+}
+```
+
+### Spring Animation
+
+Provisional [react-spring](https://react-spring.io/) support is available! You can use the spring api to animate your maps, using the `a.` components. See [this example](https://github.com/giulioz/react-ol-fiber/blob/main/example/src/examples/Spring.tsx) to see how.
+
 ### Using primitives
 
 If you want to use your own already instanced objects, you can use the primitive wrapper and set a custom attach:
@@ -194,39 +231,6 @@ function Test() {
   return (
     <MapComponent>
       <myLayer arg={{ ctorArg: false }} myNumber={42} />
-    </MapComponent>
-  );
-}
-```
-
-### Hooks
-
-Whenever you need to access the underlying OpenLayers map instance, you can use the `useOL()` hook. Remember that this can work only inside a component that is child of a MapComponent. :warning:
-
-```tsx
-function Inner() {
-  const { map } = useOL();
-  function centerOnFeatures(extent: number[]) {
-    const view = map.getView();
-    view.fit(extent);
-  }
-
-  return (
-    <vectorLayer>
-      <vectorSource onChange={e => centerOnFeatures(e.target.getExtent())}>
-        <feature>
-          <circleGeometry args={[[0, 0], 30000]} />
-        </feature>
-      </vectorSource>
-    </vectorLayer>
-  );
-}
-
-function Parent() {
-  // WARNING: you can't use useOL() here
-  return (
-    <MapComponent>
-      <Inner />
     </MapComponent>
   );
 }

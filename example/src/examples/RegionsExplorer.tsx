@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Box, CssBaseline, ThemeProvider, createTheme, Typography, Button, Stack } from '@mui/material';
 import { Feature, MapBrowserEvent } from 'ol';
 import { Polygon } from 'ol/geom';
@@ -26,10 +26,13 @@ function RegionsOutlinesLayer({
   const sourceRef = useRef<VectorSource<any>>(null);
 
   const { map } = useOL();
-  function centerOnFeatures(extent: number[], padding = 50) {
-    const view = map.getView();
-    view.fit(extent, { padding: [padding, padding, padding, padding] });
-  }
+  const centerOnFeatures = useCallback(
+    (extent: number[], padding = 50) => {
+      const view = map.getView();
+      view.fit(extent, { padding: [padding, padding, padding, padding] });
+    },
+    [map],
+  );
 
   useEffect(() => {
     const feature = features.find(f => f.get('reg_name') === clicked) as Feature<Polygon> | null;
@@ -39,7 +42,7 @@ function RegionsOutlinesLayer({
     } else if (sourceRef.current) {
       centerOnFeatures(sourceRef.current.getExtent());
     }
-  }, [clicked]);
+  }, [clicked, centerOnFeatures, features]);
 
   return (
     <>
