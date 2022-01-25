@@ -24,7 +24,7 @@ Globals.assign({
 });
 
 const host = createHost(primitives, {
-  applyAnimatedValues: applyProps,
+  applyAnimatedValues: (instance, props) => applyProps(instance, props, undefined, undefined, true),
 });
 
 export const animated = host.animated;

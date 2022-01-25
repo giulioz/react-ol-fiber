@@ -23,6 +23,7 @@ type GenericOLInstance = {
   _root?: any;
   _parent?: GenericOLInstance;
   _primitive?: boolean;
+  _type?: string;
   _attached?: { key: string; value: GenericOLInstance }[];
   _attachedAdd?: { key: string; value: GenericOLInstance }[];
 } & { [k in `get${Capitalize<string>}`]: () => any } & {
@@ -86,7 +87,13 @@ function getHaser<TK extends string>(instance: GenericOLInstance, prop: TK) {
   return instance[`has${pascalCase(prop)}` as const]?.bind(instance) || ((value: any) => arrayChecker(value)) || (() => false);
 }
 
-export function applyProps(instance: GenericOLInstance, newProps: Record<string, unknown>, oldProps?: Record<string, unknown>, diff?: string[]) {
+export function applyProps(
+  instance: GenericOLInstance,
+  newProps: Record<string, unknown>,
+  oldProps?: Record<string, unknown>,
+  diff?: string[],
+  forceReplace?: boolean,
+) {
   // Filter identical props and reserved keys
   const identical = Object.keys(newProps).filter(key => newProps[key] === oldProps?.[key]);
   const props = pruneKeys(newProps, [...identical, 'children', 'key', 'ref']);
@@ -106,6 +113,11 @@ export function applyProps(instance: GenericOLInstance, newProps: Record<string,
           setter(value);
         } else {
           // No setter, must recreate!
+          if (forceReplace && instance._type && instance._parent) {
+            const newInstance = createInstance(instance._type, newProps);
+            removeChild(instance._parent, instance);
+            appendChild(instance._parent, newInstance);
+          }
         }
       }
     });
@@ -274,6 +286,7 @@ function createInstance(type: string, { object, arg, args, ...props }: any) {
   }
 
   const instance = (object instanceof Function ? object() : object) || (Array.isArray(args) ? new target(...args) : new target(arg));
+  instance._type = type;
 
   applyProps(instance, props, {}, []);
   return instance;
