@@ -59,7 +59,7 @@ export function Spring() {
             <>
               <a.vectorLayer opacity={opacity}>
                 <styleStyle>
-                  <fillStyle arg={{ color: ' red' }} />
+                  <fillStyle arg={{ color: 'red' }} />
                 </styleStyle>
 
                 <vectorSource>
