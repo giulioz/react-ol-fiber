@@ -14,6 +14,8 @@ import { pascalCase, pruneKeys, shallowCompare } from './utils';
 type GenericOLInstance = {
   dispose?: () => void;
   changed?: () => void;
+  getVisible?: () => boolean;
+  setVisible?: (v: boolean) => void;
   get?: (key: string) => unknown;
   set?: (key: string, value: unknown) => void;
   on(ev: string, handler: (...args: any) => void): void;
@@ -411,6 +413,16 @@ export const reconciler = Reconciler({
     // Otherwise just overwrite props
     else applyProps(instance, newProps, oldProps, diff);
   },
+
+  hideInstance(instance: GenericOLInstance) {
+    instance.setVisible?.(false);
+  },
+  unhideInstance(instance: GenericOLInstance, props: Record<string, unknown>) {
+    if (props.visible == null || props.visible) {
+      instance.setVisible?.(true);
+    }
+  },
+  hideTextInstance() {},
 
   supportsPersistence: false,
   supportsHydration: false,
