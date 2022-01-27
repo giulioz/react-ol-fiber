@@ -201,6 +201,39 @@ function Component() {
 
 :warning: Using the `<olPrimitive />` instrinsic the props will not be checked. To have a generic primitive component, based on the `object` prop type, use the `<OLPrimitive />` wrapper instead.
 
+### Using functions
+
+Sometimes in OpenLayers it's convenient to use a function for some objects, such as style functions, to avoid creating too many objects.
+
+```tsx
+function Component() {
+  return (
+    <vectorLayer>
+      <olFn fn={feature => new Style({ fill: new Fill({ color: feature.get('color') }) })} attach='style' />
+
+      {/* OR */}
+
+      <olFn
+        fn={feature => (
+          <styleStyle>
+            <fillStyle arg={{ color: feature.get('color') }} />
+          </styleStyle>
+        )}
+        attach='style'
+      />
+
+      <vectorSource>
+        <feature color='red'>
+          <circleGeometry args={[[0, 0], 20000]} />
+        </feature>
+      </vectorSource>
+    </vectorLayer>
+  );
+}
+```
+
+:warning: Please note that the second option, using JSX, does NOT use React to render the elements, it manually creates instances reading the JSX. Please use it with caution and DON'T use components in there.
+
 ### Extending the catalogue
 
 To extend the available components reachable by react-ol-fiber, you can use the `extend()` command. You can even implement your own props application logic using setters!
