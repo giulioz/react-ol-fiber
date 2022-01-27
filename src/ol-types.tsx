@@ -56,7 +56,9 @@ export interface NodeProps<T, P> {
   onUpdate?: (self: T) => void;
 }
 
-export type PrimitiveType<T, P> = NodeProps<T, P> & { object: T | (() => T) };
+export type PrimitiveType<T> = Omit<NodeProps<T, any>, 'arg' | 'args'> & { object: T | (() => T) };
+
+export type FnType<TR, TP extends unknown[]> = Omit<NodeProps<TR, any>, 'arg' | 'args'> & { fn: (...params: TP) => TR };
 
 type EventHandlerKeys<T> = T extends {
   on: (keys: [infer K], ...args: any) => any;
@@ -130,8 +132,8 @@ export type AllElements = BaseElements &
   GeometryElements &
   StyleElements &
   ControlElements & {
-    olPrimitive: PrimitiveType<any, any>;
-    olFn: Node<ConstructedObject<typeof OL['View']>, typeof OL['View']>;
+    olPrimitive: PrimitiveType<any>;
+    olFn: FnType<any, any>;
     olView: Node<ConstructedObject<typeof OL['View']>, typeof OL['View']>;
   };
 
@@ -143,6 +145,11 @@ declare global {
 }
 
 // Allows correct props for a primitive with generics
-export function OLPrimitive<T>(props: { object: T } & NodeProps<T, unknown>) {
+export function OLPrimitive<T>(props: Omit<NodeProps<T, any>, 'arg' | 'args'> & { object: T }) {
   return <olPrimitive {...props} />;
+}
+
+// Allows correct props for a function with generics
+export function OLFn<TR, TP extends unknown[]>(props: Omit<NodeProps<TR, any>, 'arg' | 'args'> & { fn: (...params: TP) => TR }) {
+  return <olFn {...props} />;
 }

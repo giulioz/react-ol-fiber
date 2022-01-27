@@ -1,3 +1,4 @@
+import React from 'react';
 import Reconciler from 'react-reconciler';
 import { unstable_now as now } from 'scheduler';
 
@@ -265,11 +266,33 @@ function getImmutableChildren(type: string, children: any): false | { type: stri
   return false;
 }
 
-function createInstance(type: string, { object, arg, args, ...props }: any) {
+// Hacky mini renderer for style functions
+function miniChildCreate(jsx: JSX.Element) {
+  if (!jsx) return null;
+  const root = createInstance(jsx.type, jsx.props);
+  const children: JSX.Element[] = Array.isArray(jsx.props.children) ? jsx.props.children : [jsx.props.children];
+  const childrenCreated = children.map(miniChildCreate);
+  childrenCreated.forEach(c => appendChild(root, c));
+  return root;
+}
+
+function fnWrapper(fn: Function) {
+  return (...params: any[]) => {
+    const jsx = fn(...params);
+    if (React.isValidElement(jsx)) {
+      return miniChildCreate(jsx);
+    } else {
+      return jsx;
+    }
+  };
+}
+
+function createInstance(type: string, { object, arg, args, fn, ...props }: any) {
   const target = getConstructor(type);
 
-  if (type !== 'olPrimitive' && !target) throw new Error(`${type} is not a part of the OL namespace.`);
+  if (type !== 'olPrimitive' && type !== 'olFn' && !target) throw new Error(`${type} is not a part of the OL namespace.`);
   if (type === 'olPrimitive' && !object) throw new Error(`"object" must be set when using primitives.`);
+  if (type === 'olFn' && !fn) throw new Error(`"fn" must be a function when using olFn.`);
 
   props = { ...autoAttach(type, props, object), ...props };
 
@@ -287,7 +310,10 @@ function createInstance(type: string, { object, arg, args, ...props }: any) {
     arg = { ...arg, ...childrenArgs };
   }
 
-  const instance = (object instanceof Function ? object() : object) || (Array.isArray(args) ? new target(...args) : new target(arg));
+  const instance =
+    (fn instanceof Function && fnWrapper(fn)) ||
+    (object instanceof Function ? object() : object) ||
+    (Array.isArray(args) ? new target(...args) : new target(arg));
   instance._type = type;
 
   applyProps(instance, props, {}, []);
