@@ -1,5 +1,11 @@
 # react-ol-fiber
 
+## 2.2.2
+
+### Patch Changes
+
+- 8a03938: Fixed a bug when using Supense inside the reconciler
+
 ## 2.2.1
 
 ### Patch Changes
