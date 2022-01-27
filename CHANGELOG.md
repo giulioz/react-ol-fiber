@@ -1,5 +1,15 @@
 # react-ol-fiber
 
+## 3.0.0
+
+### Major Changes
+
+- 32602d9: Renamed primitive to olPrimitive
+
+### Minor Changes
+
+- d47967f: Added (very hacky) support for render functions using `<olFn />` component
+
 ## 2.2.2
 
 ### Patch Changes
