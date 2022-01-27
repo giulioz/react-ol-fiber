@@ -74,7 +74,7 @@
 
 //         <vectorSource args={{ wrapX: false }} onChange={e => setExtent(e?.target?.getExtent())}>
 //           {features.map((feature, i) => (
-//             <primitive object={feature} key={i} attachAdd='feature' />
+//             <olPrimitive object={feature} key={i} attachAdd='feature' />
 //           ))}
 //         </vectorSource>
 //       </vectorLayer>

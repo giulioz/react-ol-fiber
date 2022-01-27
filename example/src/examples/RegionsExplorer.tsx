@@ -49,7 +49,7 @@ function RegionsOutlinesLayer({
       <vectorLayer>
         <vectorSource ref={sourceRef}>
           {features.map((feature, i) => (
-            <primitive object={feature} key={i} attachAdd='feature'>
+            <olPrimitive object={feature} key={i} attachAdd='feature'>
               <styleStyle>
                 <strokeStyle arg={{ color: 'red', width: 2 }} />
                 <fillStyle
@@ -63,7 +63,7 @@ function RegionsOutlinesLayer({
                   }}
                 />
               </styleStyle>
-            </primitive>
+            </olPrimitive>
           ))}
         </vectorSource>
       </vectorLayer>

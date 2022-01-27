@@ -130,7 +130,8 @@ export type AllElements = BaseElements &
   GeometryElements &
   StyleElements &
   ControlElements & {
-    primitive: PrimitiveType<any, any>;
+    olPrimitive: PrimitiveType<any, any>;
+    olFn: Node<ConstructedObject<typeof OL['View']>, typeof OL['View']>;
     olView: Node<ConstructedObject<typeof OL['View']>, typeof OL['View']>;
   };
 
@@ -143,5 +144,5 @@ declare global {
 
 // Allows correct props for a primitive with generics
 export function OLPrimitive<T>(props: { object: T } & NodeProps<T, unknown>) {
-  return <primitive {...props} />;
+  return <olPrimitive {...props} />;
 }

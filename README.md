@@ -184,7 +184,7 @@ Provisional [react-spring](https://react-spring.io/) support is available! You c
 
 ### Using primitives
 
-If you want to use your own already instanced objects, you can use the primitive wrapper and set a custom attach:
+If you want to use your own already instanced objects, you can use the `olPrimitive` wrapper and set a custom attach:
 
 ```tsx
 function Component() {
@@ -192,14 +192,14 @@ function Component() {
   return (
     <vectorSource>
       {features.map((feature, i) => (
-        <primitive object={feature} key={i} attachAdd='feature' />
+        <olPrimitive object={feature} key={i} attachAdd='feature' />
       ))}
     </vectorSource>
   );
 }
 ```
 
-:warning: Using the `<primitive />` instrinsic the props will not be checked. To have a generic primitive component, based on the `object` prop type, use the `<OLPrimitive />` wrapper instead.
+:warning: Using the `<olPrimitive />` instrinsic the props will not be checked. To have a generic primitive component, based on the `object` prop type, use the `<OLPrimitive />` wrapper instead.
 
 ### Extending the catalogue
 

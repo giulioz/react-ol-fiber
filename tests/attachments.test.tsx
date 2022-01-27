@@ -256,14 +256,14 @@ describe('Static attachments', () => {
       <vectorLayer>
         <vectorSource>
           <feature>
-            <primitive object={new Point([])} />
+            <olPrimitive object={new Point([])} />
           </feature>
           <feature>
-            <primitive object={new Circle([2, 5], 4)} />
+            <olPrimitive object={new Circle([2, 5], 4)} />
           </feature>
-          <primitive object={new Feature(new Polygon([]))} />
+          <olPrimitive object={new Feature(new Polygon([]))} />
         </vectorSource>
-        <primitive object={new Style()} />
+        <olPrimitive object={new Style()} />
       </vectorLayer>,
     );
     const layer = map.getLayers().getArray()[0] as VectorLayer<VectorSource<any>>;
@@ -277,19 +277,19 @@ describe('Static attachments', () => {
   test('correctly attaches children in primitives', async () => {
     const [_, map] = await miniRender(
       <vectorLayer>
-        <primitive object={new VectorSource()}>
+        <olPrimitive object={new VectorSource()}>
           <feature>
             <pointGeometry arg={[]} />
           </feature>
           <feature>
-            <primitive object={new Circle([2, 5], 4)} />
+            <olPrimitive object={new Circle([2, 5], 4)} />
           </feature>
-          <primitive object={new Feature(new Polygon([]))} />
-        </primitive>
-        <primitive object={new Style()}>
+          <olPrimitive object={new Feature(new Polygon([]))} />
+        </olPrimitive>
+        <olPrimitive object={new Style()}>
           <fillStyle arg={{ color: 'red' }} />
           <strokeStyle arg={{ color: 'blue' }} />
-        </primitive>
+        </olPrimitive>
       </vectorLayer>,
     );
     const layer = map.getLayers().getArray()[0] as VectorLayer<VectorSource<any>>;

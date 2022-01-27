@@ -240,7 +240,7 @@ function autoAttach(name: string, props: any, object?: any) {
     return { attach: 'view' };
   } else if (name.toLowerCase().endsWith('feature') || object instanceof OL.Feature) {
     return { attachAdd: 'feature' };
-  } else if (name === 'primitive') {
+  } else if (name === 'olPrimitive') {
     return { _primitive: true };
   }
   return {};
@@ -268,8 +268,8 @@ function getImmutableChildren(type: string, children: any): false | { type: stri
 function createInstance(type: string, { object, arg, args, ...props }: any) {
   const target = getConstructor(type);
 
-  if (type !== 'primitive' && !target) throw new Error(`${type} is not a part of the OL namespace.`);
-  if (type === 'primitive' && !object) throw new Error(`"object" must be set when using primitives.`);
+  if (type !== 'olPrimitive' && !target) throw new Error(`${type} is not a part of the OL namespace.`);
+  if (type === 'olPrimitive' && !object) throw new Error(`"object" must be set when using primitives.`);
 
   props = { ...autoAttach(type, props, object), ...props };
 
@@ -408,7 +408,7 @@ export const reconciler = Reconciler({
     newProps: Record<string, unknown>,
     fiber: Reconciler.Fiber,
   ) {
-    // Reconstruct when args or <primitive object={...} have changes
+    // Reconstruct when args or <olPrimitive object={...} have changes
     if (reconstruct) switchInstance(instance, type, newProps, fiber);
     // Otherwise just overwrite props
     else applyProps(instance, newProps, oldProps, diff);
