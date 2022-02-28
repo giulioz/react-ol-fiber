@@ -1,6 +1,6 @@
 import { miniRender } from './utils';
 import { extend } from '../src';
-import React, { useRef, useState } from 'react';
+import React, { PropsWithChildren, useState } from 'react';
 
 import { Fill, Stroke, Style } from 'ol/style';
 import CircleStyle from 'ol/style/Circle';
@@ -14,6 +14,7 @@ import VectorSource from 'ol/source/Vector';
 import { Feature } from 'ol';
 import { Attribution, Zoom } from 'ol/control';
 import BaseObject from 'ol/Object';
+import Static from 'ol/source/ImageStatic';
 
 class UnknownCustom extends BaseObject {}
 extend({ UnknownCustom: UnknownCustom as any });
@@ -167,7 +168,7 @@ describe('Static attachments', () => {
     function TestComponent() {
       return <unknownCustom ref={(e: any) => (refVal = e)} />;
     }
-    const [_, map] = await miniRender(<TestComponent />);
+    await miniRender(<TestComponent />);
     expect(refVal).toBeInstanceOf(UnknownCustom);
     expect(refVal.attach).toBeFalsy();
     expect(refVal.attachAdd).toBeFalsy();
@@ -307,6 +308,62 @@ describe('Static attachments', () => {
     const [_, map] = await miniRender(<olView arg={{ center: [42, 42] }} />);
     map.on('change:view', () => expect(map.getView().getCenter()).toBe([42, 42]));
   });
+
+  test('correctly attaches immutable components in order after reconstruction', async () => {
+    let counter = 0;
+    let externalEvent = (value: number) => {};
+    function OrthoImageSource({ url }: { url: string }) {
+      return (
+        <imageStaticSource
+          arg={{ url }}
+          ref={(e: any) => {
+            if (e && e.test === undefined) {
+              e.test = counter++;
+            }
+          }}
+        />
+      );
+    }
+    function ImageLayer({ children, opacity = 1 }: PropsWithChildren<{ opacity?: number }>) {
+      return <imageLayer opacity={opacity}>{children}</imageLayer>;
+    }
+    function Inner() {
+      const [state, setState] = useState(0.3);
+      externalEvent = setState;
+      return (
+        <>
+          <ImageLayer opacity={0.2}>
+            <OrthoImageSource url={'http://aaa.com/{x}/{y}/{z}'} />
+          </ImageLayer>
+          <ImageLayer opacity={state}>
+            <imageStaticSource
+              arg={{ url: 'http://bbb.com/{x}/{y}/{z}' }}
+              ref={(e: any) => {
+                if (e && e.test === undefined) {
+                  e.test = counter++;
+                }
+              }}
+            />
+          </ImageLayer>
+        </>
+      );
+    }
+    const [_, map, act] = await miniRender(<Inner />);
+    expect((map.getLayers().getArray()[0] as ImageLayer<Static>).getSource()).toBeInstanceOf(Static);
+    expect((map.getLayers().getArray()[1] as ImageLayer<Static>).getSource()).toBeInstanceOf(Static);
+    expect(((map.getLayers().getArray()[0] as ImageLayer<Static>).getSource() as any).test).toBe(0);
+    expect(((map.getLayers().getArray()[1] as ImageLayer<Static>).getSource() as any).test).toBe(1);
+    expect((map.getLayers().getArray()[0] as ImageLayer<Static>).getSource().getUrl()).toMatch(new RegExp('http://aaa.com?'));
+    expect((map.getLayers().getArray()[1] as ImageLayer<Static>).getSource().getUrl()).toMatch(new RegExp('http://bbb.com?'));
+    await act(async () => externalEvent(0.9));
+    await act(async () => externalEvent(0.7));
+    await act(async () => externalEvent(0.1));
+    await act(async () => externalEvent(0.2));
+    expect(((map.getLayers().getArray()[0] as ImageLayer<Static>).getSource() as any).test).toBe(0);
+    expect(((map.getLayers().getArray()[1] as ImageLayer<Static>).getSource() as any).test).toBe(1);
+    expect((map.getLayers().getArray()[0] as ImageLayer<Static>).getSource().getUrl()).toMatch(new RegExp('http://aaa.com?'));
+    expect((map.getLayers().getArray()[1] as ImageLayer<Static>).getSource().getUrl()).toMatch(new RegExp('http://bbb.com?'));
+  });
 });
 
 describe('Dynamic attachments', () => {
@@ -318,18 +375,18 @@ describe('Dynamic attachments', () => {
       return <vectorLayer>{state > 0 && <styleStyle>{state > 1 && <fillStyle arg={{ color: 'red' }} />}</styleStyle>}</vectorLayer>;
     }
     const [_, map, act] = await miniRender(<Component />);
-    const layer = map.getLayers().getArray()[0] as VectorLayer<VectorSource<any>>;
-    expect(layer.getStyle()).toBeInstanceOf(Function);
+    const getLayer = () => map.getLayers().getArray()[0] as VectorLayer<VectorSource<any>>;
+    expect(getLayer().getStyle()).toBeInstanceOf(Function);
     await act(async () => externalEvent(1));
-    expect(layer.getStyle()).toBeTruthy();
-    expect((layer.getStyle() as Style).getFill()).toBeFalsy();
+    expect(getLayer().getStyle()).toBeTruthy();
+    expect((getLayer().getStyle() as Style).getFill()).toBeFalsy();
     await act(async () => externalEvent(2));
-    expect((layer.getStyle() as Style).getFill()).toBeInstanceOf(Fill);
-    expect((layer.getStyle() as Style).getFill().getColor()).toBe('red');
+    expect((getLayer().getStyle() as Style).getFill()).toBeInstanceOf(Fill);
+    expect((getLayer().getStyle() as Style).getFill().getColor()).toBe('red');
     await act(async () => externalEvent(1));
-    expect((layer.getStyle() as Style).getFill()).toBeFalsy();
+    expect((getLayer().getStyle() as Style).getFill()).toBeFalsy();
     await act(async () => externalEvent(0));
-    expect(layer.getStyle()).toBeFalsy();
+    expect(getLayer().getStyle()).toBeFalsy();
   });
 
   test('correctly attaches features in order from state with timeout', async () => {
@@ -359,16 +416,16 @@ describe('Dynamic attachments', () => {
         <Component />
       </vectorLayer>,
     );
-    const layer = map.getLayers().getArray()[0] as VectorLayer<VectorSource<any>>;
-    expect(layer.getSource().getFeatures()).toHaveLength(0);
+    const getLayer = () => map.getLayers().getArray()[0] as VectorLayer<VectorSource<any>>;
+    expect(getLayer().getSource().getFeatures()).toHaveLength(0);
     await act(async () => externalEvent());
-    expect(layer.getSource().getFeatures()).toHaveLength(3);
-    expect(layer.getSource().getFeatures()[0].getGeometry()).toBeInstanceOf(Point);
-    expect((layer.getSource().getFeatures()[0].getGeometry() as Point).getCoordinates()).toStrictEqual([0, 0]);
-    expect(layer.getSource().getFeatures()[1].getGeometry()).toBeInstanceOf(Point);
-    expect((layer.getSource().getFeatures()[1].getGeometry() as Point).getCoordinates()).toStrictEqual([1, 1]);
-    expect(layer.getSource().getFeatures()[2].getGeometry()).toBeInstanceOf(Point);
-    expect((layer.getSource().getFeatures()[2].getGeometry() as Point).getCoordinates()).toStrictEqual([2, 2]);
+    expect(getLayer().getSource().getFeatures()).toHaveLength(3);
+    expect(getLayer().getSource().getFeatures()[0].getGeometry()).toBeInstanceOf(Point);
+    expect((getLayer().getSource().getFeatures()[0].getGeometry() as Point).getCoordinates()).toStrictEqual([0, 0]);
+    expect(getLayer().getSource().getFeatures()[1].getGeometry()).toBeInstanceOf(Point);
+    expect((getLayer().getSource().getFeatures()[1].getGeometry() as Point).getCoordinates()).toStrictEqual([1, 1]);
+    expect(getLayer().getSource().getFeatures()[2].getGeometry()).toBeInstanceOf(Point);
+    expect((getLayer().getSource().getFeatures()[2].getGeometry() as Point).getCoordinates()).toStrictEqual([2, 2]);
   });
 
   test('correctly attaches and removes a new layer in the middle after a while', async () => {

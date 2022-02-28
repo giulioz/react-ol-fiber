@@ -33,7 +33,7 @@ type GenericOLInstance = {
   [k in `set${Capitalize<string>}`]: (value: any) => void;
 } & {
   [k in `add${Capitalize<string>}`]: (value: any) => void;
-} & { [k in `remove${Capitalize<string>}`]: (value: any) => void } & {
+} & { [k in `remove${Capitalize<string>}`]: (value: any) => GenericOLInstance | null } & {
   [k in `has${Capitalize<string>}`]: (value: any) => boolean;
 };
 
@@ -173,6 +173,8 @@ function appendChild(parentInstance: GenericOLInstance, child: GenericOLInstance
 function removeChild(parentInstance: GenericOLInstance, child: GenericOLInstance) {
   if (!child) return;
 
+  let after: GenericOLInstance | null = null;
+
   if (child.attach) {
     const setter = getSetter(parentInstance, child.attach);
     if (setter) {
@@ -188,7 +190,7 @@ function removeChild(parentInstance: GenericOLInstance, child: GenericOLInstance
   } else if (child.attachAdd && getHaser(parentInstance, child.attachAdd)(child)) {
     const remover = getRemover(parentInstance, child.attachAdd);
     if (remover) {
-      remover(child);
+      after = remover(child);
       parentInstance._attachedAdd = parentInstance._attachedAdd || [];
       parentInstance._attachedAdd.splice(
         parentInstance._attachedAdd.findIndex(e => e.key === child.attachAdd && e.value === child),
@@ -200,6 +202,8 @@ function removeChild(parentInstance: GenericOLInstance, child: GenericOLInstance
   if (child.dispose) {
     child.dispose();
   }
+
+  return after;
 }
 
 function insertBefore(parentInstance: GenericOLInstance, child: GenericOLInstance, beforeChild: GenericOLInstance) {
@@ -251,11 +255,11 @@ function getImmutableChildren(type: string, children: any): false | { type: stri
   const target = getConstructor(type);
   if (target && children) {
     const childrenArr: { type: string; props: any }[] = Array.isArray(children) ? children : [children];
-    const unappliableChildren = childrenArr.filter(c => {
-      const a = c && typeof c.type === 'string' && { ...autoAttach(c.type, c.props), ...c.props };
-      const setter = a?.attach && target.prototype[`set${pascalCase(a.attach)}`];
-      const adder = a?.attachAdd && target.prototype[`add${pascalCase(a.attachAdd)}`];
-      return c && (!(setter || adder) || getImmutableChildren(c.type, c.props.children));
+    const unappliableChildren = childrenArr.filter(child => {
+      const attachProps = child && typeof child.type === 'string' && { ...autoAttach(child.type, child.props), ...child.props };
+      const setter = attachProps?.attach && target.prototype[`set${pascalCase(attachProps.attach)}`];
+      const adder = attachProps?.attachAdd && target.prototype[`add${pascalCase(attachProps.attachAdd)}`];
+      return child && (!(setter || adder) || getImmutableChildren(child.type, child.props.children));
     });
 
     if (unappliableChildren.length > 0) {
@@ -325,8 +329,12 @@ function switchInstance(instance: GenericOLInstance, type: string, newProps: any
   if (!parent) return;
   const newInstance = createInstance(type, newProps);
 
-  removeChild(parent, instance);
-  appendChild(parent, newInstance);
+  const after = removeChild(parent, instance);
+  if (after) {
+    insertBefore(parent, newInstance, after);
+  } else {
+    appendChild(parent, newInstance);
+  }
 
   (instance._attached || []).forEach(a => {
     appendChild(newInstance, a.value);
