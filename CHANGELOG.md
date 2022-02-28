@@ -1,5 +1,11 @@
 # react-ol-fiber
 
+## 3.0.1
+
+### Patch Changes
+
+- e47bc82: Fixes a bug where immutable child are appended in the wrong order after a rerender
+
 ## 3.0.0
 
 ### Major Changes
