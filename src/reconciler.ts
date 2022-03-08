@@ -73,8 +73,21 @@ function getConstructor(name: string) {
 function getGetter<TK extends string>(instance: GenericOLInstance, prop: TK) {
   return instance[`get${pascalCase(prop)}` as const]?.bind(instance) || (instance.get && (() => instance.get && instance.get(prop)));
 }
+function getGetterArray<TK extends string>(instance: GenericOLInstance, prop: TK) {
+  const getter = getGetter(instance, `${prop}s`);
+  if (!getter) return null;
+  else {
+    return () => {
+      const array = getter();
+      return array.array_ ? array.array_ : array;
+    };
+  }
+}
 function getSetter<TK extends string>(instance: GenericOLInstance, prop: TK) {
   return instance[`set${pascalCase(prop)}` as const]?.bind(instance) || (instance.set && ((value: any) => instance.set && instance.set(prop, value))) || null;
+}
+function getSetterArray<TK extends string>(instance: GenericOLInstance, prop: TK) {
+  return instance[`set${pascalCase(prop)}s` as const]?.bind(instance) || null;
 }
 function getAppender<TK extends string>(instance: GenericOLInstance, prop: TK) {
   return instance[`add${pascalCase(prop)}` as const]?.bind(instance) || null;
@@ -190,7 +203,12 @@ function removeChild(parentInstance: GenericOLInstance, child: GenericOLInstance
   } else if (child.attachAdd && getHaser(parentInstance, child.attachAdd)(child)) {
     const remover = getRemover(parentInstance, child.attachAdd);
     if (remover) {
-      after = remover(child);
+      const getter = getGetterArray(parentInstance, child.attachAdd);
+      const arr = getter && (getter().getArray ? getter().getArray() : (getter() as any[]));
+      const elementIndex = arr ? arr.indexOf(child) : -1;
+      after = arr && arr[elementIndex - 1];
+
+      remover(child);
       parentInstance._attachedAdd = parentInstance._attachedAdd || [];
       parentInstance._attachedAdd.splice(
         parentInstance._attachedAdd.findIndex(e => e.key === child.attachAdd && e.value === child),
@@ -210,13 +228,15 @@ function insertBefore(parentInstance: GenericOLInstance, child: GenericOLInstanc
   if (!child) return;
 
   child._parent = parentInstance;
-  const getter = getGetter(parentInstance, `${child.attachAdd}s`);
-  const setter = getSetter(parentInstance, `${child.attachAdd}s`);
+  const getter = child.attachAdd && getGetterArray(parentInstance, child.attachAdd);
+  const setter = child.attachAdd && getSetterArray(parentInstance, child.attachAdd);
   if (getter && setter) {
-    const children = (getter() as OL.Collection<unknown>)['array_'] as GenericOLInstance[];
+    const children = getter() as GenericOLInstance[];
     const index = children.indexOf(beforeChild);
     const newChildren = [...children.slice(0, index), child, ...children.slice(index)];
     setter(newChildren);
+  } else {
+    appendChild(parentInstance, child);
   }
 }
 
@@ -259,7 +279,7 @@ function getImmutableChildren(type: string, children: any): false | { type: stri
       const attachProps = child && typeof child.type === 'string' && { ...autoAttach(child.type, child.props), ...child.props };
       const setter = attachProps?.attach && target.prototype[`set${pascalCase(attachProps.attach)}`];
       const adder = attachProps?.attachAdd && target.prototype[`add${pascalCase(attachProps.attachAdd)}`];
-      return child && (!(setter || adder) || getImmutableChildren(child.type, child.props.children));
+      return child && attachProps && (!(setter || adder) || getImmutableChildren(child.type, child.props.children));
     });
 
     if (unappliableChildren.length > 0) {
