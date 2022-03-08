@@ -1,5 +1,11 @@
 # react-ol-fiber
 
+## 3.0.2
+
+### Patch Changes
+
+- 3a33a56: Fixed several bugs in element attaching in reconciler
+
 ## 3.0.1
 
 ### Patch Changes
